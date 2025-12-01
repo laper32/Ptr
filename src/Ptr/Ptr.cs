@@ -46,7 +46,6 @@ internal class Ptr : IModSharpModule
         bridge.GameData.Register("ptr.games");
 
         services.AddSingleton(identity);
-        services.AddSingleton<IModSharpModule>(this);
         services.AddSingleton(sharedSystem);
         services.AddSingleton(bridge.GameData);
         services.AddSingleton(bridge);
