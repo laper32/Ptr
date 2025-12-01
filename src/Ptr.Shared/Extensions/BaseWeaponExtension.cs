@@ -7,19 +7,19 @@ public static class BaseWeaponExtension
 {
     extension(IBaseWeapon weapon)
     {
-        public void SetClip(int clip, bool setMaxClip = true)
+        public void SetClip(int clip, bool setVData = false)
         {
             weapon.Clip = clip;
-            if (setMaxClip)
+            if (setVData)
             {
                 weapon.GetWeaponData().MaxClip = clip;
             }
         }
 
-        public void SetReserveAmmo(int reserveAmmo, bool setWeaponData = true)
+        public void SetReserveAmmo(int reserveAmmo, bool setVData = false)
         {
             weapon.ReserveAmmo = reserveAmmo;
-            if (setWeaponData)
+            if (setVData)
             {
                 weapon.GetWeaponData().PrimaryReserveAmmoMax = reserveAmmo;
             }

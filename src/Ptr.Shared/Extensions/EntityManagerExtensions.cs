@@ -39,22 +39,6 @@ public static class EntityManagerExtensions
             return self.FindPlayerPawnBySlot(client.Slot);
         }
 
-        public IEnumerable<IPlayerController> GetPlayerControllers()
-        {
-            for (var i = 0; i < InterfaceBridge.Instance.GlobalVars.MaxClients; i++)
-            {
-                if (self.FindPlayerControllerBySlot(new PlayerSlot((byte)i)) is not
-                    {
-                        ConnectedState: PlayerConnectedState.PlayerConnected
-                    } controller)
-                {
-                    continue;
-                }
-
-                yield return controller;
-            }
-        }
-
         public IEnumerable<IPlayerPawn> GetPlayerPawns()
         {
             foreach (var playerController in self.GetPlayerControllers())
