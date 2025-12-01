@@ -5,7 +5,7 @@ namespace Ptr.Shared.Extensions;
 
 public static class PlayerPawnExtension
 {
-    extension(IPlayerPawn pawn)
+    extension(IBasePlayerPawn pawn)
     {
         public void PrintToChat(string message)
         {
@@ -30,6 +30,11 @@ public static class PlayerPawnExtension
         public void PrintSayText2(string message)
         {
             pawn.Print(HudPrintChannel.SayText2, message);
+        }
+
+        public void PrintToCenterHtml(string message, int duration = 5)
+        {
+            pawn.GetController()?.PrintToCenterHtml(message, duration);
         }
     }
 }

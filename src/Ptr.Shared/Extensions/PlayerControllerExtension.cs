@@ -34,10 +34,7 @@ public static class PlayerControllerExtension
 
         public void PrintToCenterHtml(string message, int duration = 5)
         {
-            if (controller.GetGameClient() is { } client)
-            {
-                client.PrintToCenterHtml(message, duration);
-            }
+            controller.GetGameClient()?.PrintToCenterHtml(message, duration);
         }
     }
 }
