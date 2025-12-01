@@ -112,19 +112,6 @@ jobs:
         body: |
           ## Release v${{ steps.get_version.outputs.version }}
           
-          ### Installation
-          
-          **Ptr Module:**
-          - Extract `sharp/modules/Ptr/` to your server's modules directory
-          
-          **Ptr.Shared:**
-          - Extract `sharp/shared/Ptr.Shared/` to your server's shared directory
-          - Or install via NuGet: `dotnet add package Ptr.Shared --version ${{ steps.get_version.outputs.version }}`
-          
-          ### What's included
-          - Ptr.dll module
-          - Ptr.Shared.dll library
-          
           **Commit:** ${{ github.sha }}
           **Branch:** ${{ github.ref_name }}
         draft: false
