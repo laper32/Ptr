@@ -11,15 +11,15 @@ public static class HookDependencyInjection
 {
     public static void AddHooks(this IServiceCollection self)
     {
-        self.AddSingleton<NativeHookManager>();
-        self.AddSingleton<IInternalNativeHookManager>(s => s.GetRequiredService<NativeHookManager>());
-        self.AddSingleton<INativeHookManager>(s => s.GetRequiredService<NativeHookManager>());
+
+        self.AddSingleton<IInternalNativeHookManager, NativeHookManager>();
+        
         self.AddHook<HandleDropWeaponHookService>("CCSPlayer_WeaponServices::HandleDropWeapon");
     }
 
     public static void UseHooks(this IServiceProvider self)
     {
-        var hookManager = self.GetRequiredService<NativeHookManager>();
+        var hookManager = self.GetRequiredService<IInternalNativeHookManager>();
         typeof(INativeHookManager).SetStaticReadonlyProperty("Instance", hookManager);
         self.UseHook<HandleDropWeaponHookService>();
     }
