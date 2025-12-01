@@ -9,13 +9,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Remove="Events\**" />
-	  <EmbeddedResource Remove="Events\**" />
-	  <None Remove="Events\**" />
-	</ItemGroup>
-
-
-	<ItemGroup>
 		<PackageReference Include="ModSharp.Sharp.Shared" Version="*" PrivateAssets="all" />
 	</ItemGroup>
 
