@@ -45,6 +45,8 @@ internal class Ptr : IModSharpModule
         var services = new ServiceCollection();
         bridge.GameData.Register("ptr.games");
 
+        // NativeHookManager requires it
+        services.AddSingleton<IModSharpModule>(this);
         services.AddSingleton(identity);
         services.AddSingleton(sharedSystem);
         services.AddSingleton(bridge.GameData);
