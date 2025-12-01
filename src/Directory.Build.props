@@ -1,0 +1,10 @@
+<Project>
+    <PropertyGroup>
+        <Authors>laper32</Authors>
+        <Version>1.0.0</Version>
+    </PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="ModSharp.Sharp.Shared" Version="*" PrivateAssets="all" />
+	</ItemGroup>
+
+</Project>

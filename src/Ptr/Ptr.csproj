@@ -8,10 +8,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="ModSharp.Sharp.Shared" Version="*" PrivateAssets="all" />
-	</ItemGroup>
-
-	<ItemGroup>
 	  <ProjectReference Include="..\Ptr.Shared\Ptr.Shared.csproj" Private="false" ExcludeAssets="all"/>
 	</ItemGroup>
 

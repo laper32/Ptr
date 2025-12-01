@@ -6,10 +6,21 @@
 		<Nullable>enable</Nullable>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<AssemblyName>Ptr.Shared</AssemblyName>
+		
+		<!-- NuGet Package Metadata -->
+		<PackageId>Ptr.Shared</PackageId>
+
+		<Description>Shared library for Ptr module</Description>
+		<PackageProjectUrl>https://github.com/laper32/Ptr</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/laper32/Ptr</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="ModSharp.Sharp.Shared" Version="*" PrivateAssets="all" />
+		<None Include="..\..\README.md" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
 </Project>

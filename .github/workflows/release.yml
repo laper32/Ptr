@@ -1,0 +1,134 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - main  # Run on pushes to main branch
+  workflow_dispatch:  # Allow manual trigger
+
+env:
+  DOTNET_VERSION: '10.0.x'  # .NET 10.0
+  CONFIGURATION: Release
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write  # Required for creating releases
+      packages: write  # Required for publishing to GitHub Packages
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+    
+    - name: Restore dependencies
+      run: dotnet restore
+    
+    - name: Build Ptr
+      run: dotnet build src/Ptr/Ptr.csproj --configuration ${{ env.CONFIGURATION }} --no-restore
+    
+    - name: Build Ptr.Shared
+      run: dotnet build src/Ptr.Shared/Ptr.Shared.csproj --configuration ${{ env.CONFIGURATION }} --no-restore
+    
+    # Prepare release artifacts
+    - name: Prepare Ptr module artifact
+      run: |
+        mkdir -p release/sharp/modules/Ptr
+        cp src/Ptr/bin/${{ env.CONFIGURATION }}/net10.0/Ptr.dll release/sharp/modules/Ptr/
+        # Copy any additional files if needed (e.g., dependencies)
+        if [ -f src/Ptr/bin/${{ env.CONFIGURATION }}/net10.0/Ptr.pdb ]; then
+          cp src/Ptr/bin/${{ env.CONFIGURATION }}/net10.0/Ptr.pdb release/sharp/modules/Ptr/
+        fi
+    
+    - name: Prepare Ptr.Shared artifact
+      run: |
+        mkdir -p release/sharp/shared/Ptr.Shared
+        cp src/Ptr.Shared/bin/${{ env.CONFIGURATION }}/net10.0/Ptr.Shared.dll release/sharp/shared/Ptr.Shared/
+        # Copy any additional files if needed
+        if [ -f src/Ptr.Shared/bin/${{ env.CONFIGURATION }}/net10.0/Ptr.Shared.pdb ]; then
+          cp src/Ptr.Shared/bin/${{ env.CONFIGURATION }}/net10.0/Ptr.Shared.pdb release/sharp/shared/Ptr.Shared/
+        fi
+    
+    # Package Ptr.Shared for NuGet
+    - name: Pack Ptr.Shared for NuGet
+      run: dotnet pack src/Ptr.Shared/Ptr.Shared.csproj --configuration ${{ env.CONFIGURATION }} --no-build --output nupkgs
+    
+    # Create release archives
+    - name: Create release archives
+      run: |
+        cd release
+        tar -czf ../ptr-release.tar.gz sharp/
+        cd ..
+        zip -r ptr-release.zip release/sharp/
+    
+    # Upload artifacts to workflow
+    - name: Upload Ptr module artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ptr-module
+        path: release/sharp/modules/Ptr/
+    
+    - name: Upload Ptr.Shared artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ptr-shared
+        path: release/sharp/shared/Ptr.Shared/
+    
+    - name: Upload NuGet package
+      uses: actions/upload-artifact@v4
+      with:
+        name: nuget-package
+        path: nupkgs/*.nupkg
+    
+    # Publish to NuGet (on main branch or tags)
+    - name: Publish to NuGet
+      if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
+      run: dotnet nuget push nupkgs/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+      continue-on-error: true  # Don't fail if package already exists
+    
+    # Get version from Directory.Build.props
+    - name: Get version
+      id: get_version
+      run: |
+        VERSION=$(grep -oP '<Version>\K[^<]+' src/Directory.Build.props)
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "Version: $VERSION"
+    
+    # Create GitHub Release
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || format('v{0}', steps.get_version.outputs.version) }}
+        name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || format('v{0}', steps.get_version.outputs.version) }}
+        files: |
+          ptr-release.tar.gz
+          ptr-release.zip
+        body: |
+          ## Release v${{ steps.get_version.outputs.version }}
+          
+          ### Installation
+          
+          **Ptr Module:**
+          - Extract `sharp/modules/Ptr/` to your server's modules directory
+          
+          **Ptr.Shared:**
+          - Extract `sharp/shared/Ptr.Shared/` to your server's shared directory
+          - Or install via NuGet: `dotnet add package Ptr.Shared --version ${{ steps.get_version.outputs.version }}`
+          
+          ### What's included
+          - Ptr.dll module
+          - Ptr.Shared.dll library
+          
+          **Commit:** ${{ github.sha }}
+          **Branch:** ${{ github.ref_name }}
+        draft: false
+        prerelease: false
+        make_latest: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
