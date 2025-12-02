@@ -65,6 +65,16 @@ jobs:
           cp src/Ptr.Shared/bin/${{ env.CONFIGURATION }}/net10.0/Ptr.Shared.pdb release/sharp/shared/Ptr.Shared/
         fi
     
+    # Copy assets (gamedata, configs, etc.)
+    - name: Copy assets
+      run: |
+        if [ -d .asset/game ]; then
+          cp -r .asset/game/* release/
+          echo "Assets copied to release/"
+        else
+          echo "No assets found, skipping..."
+        fi
+    
     # Package Ptr.Shared for NuGet
     - name: Pack Ptr.Shared for NuGet
       run: dotnet pack src/Ptr.Shared/Ptr.Shared.csproj --configuration ${{ env.CONFIGURATION }} --no-build --output nupkgs /p:VersionSuffix=${{ steps.get_version.outputs.commit_count }}

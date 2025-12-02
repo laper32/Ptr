@@ -11,6 +11,11 @@
 	  <ProjectReference Include="..\Ptr.Shared\Ptr.Shared.csproj" Private="false" ExcludeAssets="all"/>
 	</ItemGroup>
 
+	<ItemGroup>
+		<Content Include="..\..\.asset\**\*.*">
+			<Link>.asset\%(RecursiveDir)%(Filename)%(Extension)</Link>
+		</Content>
+	</ItemGroup>
 
 
 </Project>
