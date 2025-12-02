@@ -1,3 +1,5 @@
+using Sharp.Shared.Definition;
+
 namespace Ptr.Shared.Misc;
 
 public class ChatMessageFormatter
@@ -30,28 +32,24 @@ internal static class ChatMessageFormatterExtensions
     // Dictionary for color code replacements - using only the colors from ChatColor class
     private static readonly Dictionary<string, string> ColorMap = new()
     {
-        { "{normal}", "\x01" },
-        { "{default}", "\x01" },
-        { "{white}", "\x01" },
-        { "{darkred}", "\x02" },
-        { "{pink}", "\x03" },
-        { "{green}", "\x04" },
-        { "{lightgreen}", "\x05" },
-        { "{lime}", "\x06" },
-        { "{red}", "\x07" },
-        { "{grey}", "\x08" },
-        { "{gray}", "\x08" },
-        { "{yellow}", "\x09" },
-        { "{gold}", "\x10" },
-        { "{orange}", "\x10" }, // Map orange to gold
-        { "{silver}", "\x0A" },
-        { "{lightblue}", "\x0B" },
-        { "{blue}", "\x0B" },
-        { "{darkblue}", "\x0C" },
-        { "{purple}", "\x0E" },
-        { "{lightred}", "\x0F" },
-        { "{darkorange}", "\x10" }, // Map darkorange to gold
-        { "{olive}", "\x09" } // Map olive to yellow (closest match)
+        { "{normal}", ChatColor.White },
+        { "{default}", ChatColor.White },
+        { "{white}", ChatColor.White },
+        { "{darkred}", ChatColor.DarkRed },
+        { "{pink}", ChatColor.Pink },
+        { "{green}", ChatColor.Green },
+        { "{lightgreen}", ChatColor.LightGreen },
+        { "{lime}", ChatColor.Lime },
+        { "{red}", ChatColor.Red },
+        { "{grey}", ChatColor.Grey },
+        { "{gray}", ChatColor.Grey },
+        { "{yellow}", ChatColor.Yellow },
+        { "{gold}", ChatColor.Gold },
+        { "{silver}", ChatColor.Silver },
+        { "{blue}", ChatColor.Blue },
+        { "{darkblue}", ChatColor.DarkBlue },
+        { "{purple}", ChatColor.Purple },
+        { "{lightred}", ChatColor.LightRed }
     };
 
     extension(string self)
