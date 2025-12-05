@@ -34,7 +34,7 @@ public static class BaseWeaponExtension
         {
             get
             {
-                var itemDef = weapon.ItemDefinitionIndex.Cast<EconItemId>();
+                var itemDef = (EconItemId)weapon.ItemDefinitionIndex;
                 return itemDef is
                     EconItemId.Xm1014 or
                     EconItemId.Nova or
@@ -47,7 +47,7 @@ public static class BaseWeaponExtension
         {
             get
             {
-                var itemDef = weapon.ItemDefinitionIndex.Cast<EconItemId>();
+                var itemDef = (EconItemId)weapon.ItemDefinitionIndex;
                 return itemDef is
                     EconItemId.Awp or
                     EconItemId.G3Sg1 or
@@ -59,7 +59,7 @@ public static class BaseWeaponExtension
         {
             get
             {
-                var itemDef = weapon.ItemDefinitionIndex.Cast<EconItemId>();
+                var itemDef = (EconItemId)weapon.ItemDefinitionIndex;
                 return itemDef is
                     EconItemId.Deagle or
                     EconItemId.Elite or
