@@ -36,5 +36,21 @@ public static class PlayerControllerExtension
         {
             controller.GetGameClient()?.PrintToCenterHtml(message, duration);
         }
+        
+        public void SetClantag(string clantag)
+        {
+            var name = controller.PlayerName;
+
+            if (name[^1] == ' ')
+            {
+                controller.PlayerName = name.TrimEnd(' ');
+            }
+            else
+            {
+                controller.PlayerName = name + " ";
+            }
+
+            controller.SetClanTag(clantag);
+        }
     }
 }
