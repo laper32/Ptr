@@ -1,5 +1,4 @@
 using Ptr.Shared.Bridge;
-using Sharp.Shared.Enums;
 using Sharp.Shared.GameEntities;
 using Sharp.Shared.Managers;
 using Sharp.Shared.Objects;

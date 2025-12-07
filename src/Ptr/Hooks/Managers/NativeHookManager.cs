@@ -34,8 +34,7 @@ internal class NativeHookManager : IInternalNativeHookManager
 
     public void OnInit()
     {
-        // Use Distinct() to prevent calling Load() multiple times on the same hook instance
-        foreach (var hook in _hooks.Where(x => x.Module.Equals(_self)).Select(x => x.Hook).Distinct())
+        foreach (var hook in _hooks.Where(x => x.Module.Equals(_self)).Select(x => x.Hook))
         {
             hook.Load();
         }
@@ -43,8 +42,7 @@ internal class NativeHookManager : IInternalNativeHookManager
 
     public void OnShutdown()
     {
-        // Use Distinct() to prevent calling Unload() multiple times on the same hook instance
-        foreach (var hook in _hooks.Where(x => x.Module.Equals(_self)).Select(x => x.Hook).Distinct())
+        foreach (var hook in _hooks.Where(x => x.Module.Equals(_self)).Select(x => x.Hook))
         {
             hook.Unload();
         }
@@ -64,7 +62,8 @@ internal class NativeHookManager : IInternalNativeHookManager
     {
         if (_hooks.FirstOrDefault(x => x.Hook.Equals(hook)) is not null)
         {
-            _logger.LogError("Hook type {Type} has already been registered. Skipping duplicate registration.", hook.GetType().Name);
+            _logger.LogError("Hook type {Type} has already been registered. Skipping duplicate registration.",
+                hook.GetType().Name);
             return;
         }
 

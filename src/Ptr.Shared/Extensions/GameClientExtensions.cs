@@ -55,7 +55,8 @@ public static class GameClientExtensions
 
         public void PrintToCenterHtml(string message, int duration = 5)
         {
-            if (InterfaceBridge.Instance.EventManager.CreateEvent("show_survival_respawn_status", true) is not { } e)
+            if (InterfaceBridge.Instance.EventManager.CreateEvent("show_survival_respawn_status", true) is not
+                { } e)
             {
                 return;
             }

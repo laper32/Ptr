@@ -5,7 +5,7 @@ namespace Ptr.Shared.Extensions;
 public static class VectorExtensions
 {
     /// <summary>
-    /// Stolen from @prefix's code. Thanks dude :kekw:
+    ///     Stolen from @prefix's code. Thanks dude :kekw:
     /// </summary>
     /// <param name="self"></param>
     /// <returns></returns>

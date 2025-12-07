@@ -11,9 +11,8 @@ public static class HookDependencyInjection
 {
     public static void AddHooks(this IServiceCollection self)
     {
-
         self.AddSingleton<IInternalNativeHookManager, NativeHookManager>();
-        
+
         self.AddHook<HandleDropWeaponHookService>("CCSPlayer_WeaponServices::HandleDropWeapon");
         self.AddHook<HandleCommandBuyHookService>("CCSPlayer_BuyServices::HandleCommand_Buy_Internal");
     }

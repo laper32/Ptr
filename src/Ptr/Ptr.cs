@@ -1,14 +1,14 @@
 // ReSharper disable UnusedParameter.Local
 
+using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Ptr.Hooks;
 using Ptr.Shared.Bridge;
 using Ptr.Shared.Hosting;
 using Sharp.Shared;
 using Sharp.Shared.Abstractions;
-using System.Runtime.CompilerServices;
-using Ptr.Hooks;
 
 [assembly: DisableRuntimeMarshalling]
 [assembly: InternalsVisibleTo("Ptr.Shared")]
@@ -70,7 +70,7 @@ internal class Ptr : IModSharpModule
     {
         _provider.LoadAllSharpExtensions();
         _provider.CallInit<IModule>(e => { _logger.LogError(e, "An error occurred when calling Init."); });
-        
+
         return true;
     }
 
