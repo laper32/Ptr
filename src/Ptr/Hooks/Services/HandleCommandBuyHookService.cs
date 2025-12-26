@@ -88,7 +88,7 @@ internal unsafe class HandleCommandBuyHookService :
 
     protected override void Prepare(IDetourHook hook)
     {
-        hook.Prepare(Name, (nint)(delegate* unmanaged<nint, uint, int>)&Hook);
+        hook.Prepare(Name, (nint)(delegate* unmanaged<nint, uint, nint, bool, bool, int>)&Hook);
     }
 
     protected override void InternalShutdown()
@@ -103,35 +103,34 @@ internal unsafe class HandleCommandBuyHookService :
         _trampoline = trampoline;
     }
 
-
     [UnmanagedCallersOnly]
-    private static int Hook(nint pService, uint nItemSlot)
+    private static int Hook(nint pService, uint nItemSlot, nint a3, bool a4, bool a5)
     {
-        return Instance.HookInternal(pService, nItemSlot);
+        return Instance.HookInternal(pService, nItemSlot, a3, a4, a5);
     }
 
-    private int HookInternal(nint pService, uint nItemSlot)
+    private int HookInternal(nint pService, uint nItemSlot, nint a3, bool a4, bool a5)
     {
-        var call = (delegate* unmanaged<nint, uint, int>)_trampoline;
+        var call = (delegate* unmanaged<nint, uint, nint, bool, bool, int>)_trampoline;
 
         if (_bridge.GetModSharp().CreateNativeObject<IWeaponService>(pService) is not { } buyService)
         {
-            return call(pService, nItemSlot);
+            return call(pService, nItemSlot, a3, a4, a5);
         }
 
         if (buyService.GetPlayer() is not IPlayerPawn pawn)
         {
-            return call(pService, nItemSlot);
+            return call(pService, nItemSlot, a3, a4, a5);
         }
 
         if (pawn.GetController() is not { } controller)
         {
-            return call(pService, nItemSlot);
+            return call(pService, nItemSlot, a3, a4, a5);
         }
 
         if (controller.GetGameClient() is not { } client)
         {
-            return call(pService, nItemSlot);
+            return call(pService, nItemSlot, a3, a4, a5);
         }
 
         var hookParams = new HandleCommandBuyHookParams(client, controller, pawn, nItemSlot);
@@ -155,7 +154,7 @@ internal unsafe class HandleCommandBuyHookService :
             default:
             {
                 // Call original function
-                var ret = call(pService, nItemSlot);
+                var ret = call(pService, nItemSlot, a3, a4, a5);
 
                 // Invoke post-hooks
                 var postResult = new HookReturnValue<EmptyHookReturn>(EHookAction.Ignored);
