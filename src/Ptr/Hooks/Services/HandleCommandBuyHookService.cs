@@ -88,7 +88,7 @@ internal unsafe class HandleCommandBuyHookService :
 
     protected override void Prepare(IDetourHook hook)
     {
-        hook.Prepare(Name, (nint)(delegate* unmanaged<nint, uint, nint, bool, bool, int>)&Hook);
+        hook.Prepare(Name, (nint)(delegate* unmanaged<nint, uint, nint, bool, byte, int>)&Hook);
     }
 
     protected override void InternalShutdown()
@@ -104,33 +104,33 @@ internal unsafe class HandleCommandBuyHookService :
     }
 
     [UnmanagedCallersOnly]
-    private static int Hook(nint pService, uint nItemSlot, nint a3, bool a4, bool a5)
+    private static int Hook(nint pService, uint nItemSlot, nint pEconItemView, bool bAddToRebuyList, byte nAcquireMethod)
     {
-        return Instance.HookInternal(pService, nItemSlot, a3, a4, a5);
+        return Instance.HookInternal(pService, nItemSlot, pEconItemView, bAddToRebuyList, nAcquireMethod);
     }
 
-    private int HookInternal(nint pService, uint nItemSlot, nint a3, bool a4, bool a5)
+    private int HookInternal(nint pService, uint nItemSlot, nint pEconItemView, bool bAddToRebuyList, byte nAcquireMethod)
     {
-        var call = (delegate* unmanaged<nint, uint, nint, bool, bool, int>)_trampoline;
+        var call = (delegate* unmanaged<nint, uint, nint, bool, byte, int>)_trampoline;
 
         if (_bridge.GetModSharp().CreateNativeObject<IWeaponService>(pService) is not { } buyService)
         {
-            return call(pService, nItemSlot, a3, a4, a5);
+            return call(pService, nItemSlot, pEconItemView, bAddToRebuyList, nAcquireMethod);
         }
 
         if (buyService.GetPlayer() is not IPlayerPawn pawn)
         {
-            return call(pService, nItemSlot, a3, a4, a5);
+            return call(pService, nItemSlot, pEconItemView, bAddToRebuyList, nAcquireMethod);
         }
 
         if (pawn.GetController() is not { } controller)
         {
-            return call(pService, nItemSlot, a3, a4, a5);
+            return call(pService, nItemSlot, pEconItemView, bAddToRebuyList, nAcquireMethod);
         }
 
         if (controller.GetGameClient() is not { } client)
         {
-            return call(pService, nItemSlot, a3, a4, a5);
+            return call(pService, nItemSlot, pEconItemView, bAddToRebuyList, nAcquireMethod);
         }
 
         var hookParams = new HandleCommandBuyHookParams(client, controller, pawn, nItemSlot);
@@ -142,6 +142,7 @@ internal unsafe class HandleCommandBuyHookService :
             case EHookAction.SkipCallReturnOverride:
             {
                 InvokeHookPost(hookParams, preResult);
+                hookParams.MarkAsDisposed();
                 return (int)EBuyResult.PlayerCantBuy;
             }
             case EHookAction.ChangeParamReturnDefault or EHookAction.ChangeParamReturnOverride
@@ -154,11 +155,12 @@ internal unsafe class HandleCommandBuyHookService :
             default:
             {
                 // Call original function
-                var ret = call(pService, nItemSlot, a3, a4, a5);
+                var ret = call(pService, nItemSlot, pEconItemView, bAddToRebuyList, nAcquireMethod);
 
                 // Invoke post-hooks
                 var postResult = new HookReturnValue<EmptyHookReturn>(EHookAction.Ignored);
                 InvokeHookPost(hookParams, postResult);
+                hookParams.MarkAsDisposed();
                 return ret;
             }
         }

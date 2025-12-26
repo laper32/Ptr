@@ -137,7 +137,7 @@ internal unsafe class HandleDropWeaponHookService :
             return call(pService, pWeapon, swap);
         }
 
-        if (_bridge.GetClientManager().GetGameClient(controller.SteamId) is not { } client)
+        if (controller.GetGameClient() is not { } client)
         {
             return call(pService, pWeapon, swap);
         }
@@ -151,6 +151,7 @@ internal unsafe class HandleDropWeaponHookService :
             case EHookAction.SkipCallReturnOverride:
             {
                 InvokeHookPost(hookParams, preResult);
+                hookParams.MarkAsDisposed();
                 return false;
             }
             case EHookAction.ChangeParamReturnDefault or EHookAction.ChangeParamReturnOverride
@@ -168,6 +169,7 @@ internal unsafe class HandleDropWeaponHookService :
                 // Invoke post-hooks
                 var postResult = new HookReturnValue<EmptyHookReturn>(EHookAction.Ignored);
                 InvokeHookPost(hookParams, postResult);
+                hookParams.MarkAsDisposed();
                 return ret;
             }
         }
