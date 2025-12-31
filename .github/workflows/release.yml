@@ -40,91 +40,22 @@ jobs:
         echo "commit_count=$COMMIT_COUNT" >> $GITHUB_OUTPUT
         echo "Commit Count: $COMMIT_COUNT"
     
-    - name: Build Ptr
-      run: dotnet build src/Ptr/Ptr.csproj --configuration ${{ env.CONFIGURATION }} --no-restore /p:VersionSuffix=${{ steps.get_version.outputs.commit_count }}
+    # Publish modules to release directory (for GitHub release)
+    - name: Publish Ptr module
+      run: dotnet publish src/Ptr/Ptr.csproj --configuration ${{ env.CONFIGURATION }} --no-restore --output release/sharp/modules/Ptr /p:VersionSuffix=${{ steps.get_version.outputs.commit_count }}
     
-    - name: Build modules
+    - name: Publish modules
       run: |
-        dotnet build src/Ptr.Modules.MapManager/Ptr.Modules.MapManager.csproj --configuration ${{ env.CONFIGURATION }} --no-restore /p:VersionSuffix=${{ steps.get_version.outputs.commit_count }}
-        dotnet build src/Sharp.Modules.AdminManager/Sharp.Modules.AdminManager.csproj --configuration ${{ env.CONFIGURATION }} --no-restore /p:VersionSuffix=${{ steps.get_version.outputs.commit_count }}
-        dotnet build src/Sharp.Modules.CommandManager/Sharp.Modules.CommandManager.csproj --configuration ${{ env.CONFIGURATION }} --no-restore /p:VersionSuffix=${{ steps.get_version.outputs.commit_count }}
+        dotnet publish src/Ptr.Modules.MapManager/Ptr.Modules.MapManager.csproj --configuration ${{ env.CONFIGURATION }} --no-restore --output release/sharp/modules/Ptr.Modules.MapManager /p:VersionSuffix=${{ steps.get_version.outputs.commit_count }}
+        dotnet publish src/Sharp.Modules.AdminManager/Sharp.Modules.AdminManager.csproj --configuration ${{ env.CONFIGURATION }} --no-restore --output release/sharp/modules/Sharp.Modules.AdminManager /p:VersionSuffix=${{ steps.get_version.outputs.commit_count }}
+        dotnet publish src/Sharp.Modules.CommandManager/Sharp.Modules.CommandManager.csproj --configuration ${{ env.CONFIGURATION }} --no-restore --output release/sharp/modules/Sharp.Modules.CommandManager /p:VersionSuffix=${{ steps.get_version.outputs.commit_count }}
     
-    - name: Build Ptr.Shared
+    - name: Publish Ptr.Shared
       run: |
-        dotnet build src/Ptr.Shared/Ptr.Shared.csproj --configuration ${{ env.CONFIGURATION }} --no-restore /p:VersionSuffix=${{ steps.get_version.outputs.commit_count }}
-        dotnet build src/Sharp.Modules.AdminManager.Shared/Sharp.Modules.AdminManager.Shared.csproj --configuration ${{ env.CONFIGURATION }} --no-restore /p:VersionSuffix=${{ steps.get_version.outputs.commit_count }}
-        dotnet build src/Sharp.Modules.CommandManager.Shared/Sharp.Modules.CommandManager.Shared.csproj --configuration ${{ env.CONFIGURATION }} --no-restore /p:VersionSuffix=${{ steps.get_version.outputs.commit_count }}
-    
-    # Prepare release artifacts
-    - name: Prepare Ptr module artifact
-      run: |
-        mkdir -p release/sharp/modules/Ptr
-        cp src/Ptr/bin/${{ env.CONFIGURATION }}/net10.0/Ptr.dll release/sharp/modules/Ptr/
-        # Copy any additional files if needed (e.g., dependencies)
-        if [ -f src/Ptr/bin/${{ env.CONFIGURATION }}/net10.0/Ptr.pdb ]; then
-          cp src/Ptr/bin/${{ env.CONFIGURATION }}/net10.0/Ptr.pdb release/sharp/modules/Ptr/
-        fi
-
-        if [ -f src/Ptr/bin/${{ env.CONFIGURATION }}/net10.0/Ptr.deps.json ]; then
-          cp src/Ptr/bin/${{ env.CONFIGURATION }}/net10.0/Ptr.deps.json release/sharp/modules/Ptr/
-        fi
-
-        mkdir -p release/sharp/modules/Ptr.Modules.MapManager
-        cp src/Ptr.Modules.MapManager/bin/${{ env.CONFIGURATION }}/net10.0/Ptr.Modules.MapManager.dll release/sharp/modules/Ptr.Modules.MapManager/
-        if [ -f src/Ptr.Modules.MapManager/bin/${{ env.CONFIGURATION }}/net10.0/Ptr.Modules.MapManager.pdb ]; then
-          cp src/Ptr.Modules.MapManager/bin/${{ env.CONFIGURATION }}/net10.0/Ptr.Modules.MapManager.pdb release/sharp/modules/Ptr.Modules.MapManager/
-        fi
-
-        if [ -f src/Ptr.Modules.MapManager/bin/${{ env.CONFIGURATION }}/net10.0/Ptr.Modules.MapManager.deps.json ]; then
-          cp src/Ptr.Modules.MapManager/bin/${{ env.CONFIGURATION }}/net10.0/Ptr.Modules.MapManager.deps.json release/sharp/modules/Ptr.Modules.MapManager/
-        fi
-
-        mkdir -p release/sharp/modules/Sharp.Modules.AdminManager
-        cp src/Sharp.Modules.AdminManager/bin/${{ env.CONFIGURATION }}/net10.0/Sharp.Modules.AdminManager.dll release/sharp/modules/Sharp.Modules.AdminManager/
-        if [ -f src/Sharp.Modules.AdminManager/bin/${{ env.CONFIGURATION }}/net10.0/Sharp.Modules.AdminManager.pdb ]; then
-          cp src/Sharp.Modules.AdminManager/bin/${{ env.CONFIGURATION }}/net10.0/Sharp.Modules.AdminManager.pdb release/sharp/modules/Sharp.Modules.AdminManager/
-        fi
-
-        if [ -f src/Sharp.Modules.AdminManager/bin/${{ env.CONFIGURATION }}/net10.0/Sharp.Modules.AdminManager.deps.json ]; then
-          cp src/Sharp.Modules.AdminManager/bin/${{ env.CONFIGURATION }}/net10.0/Sharp.Modules.AdminManager.deps.json release/sharp/modules/Sharp.Modules.AdminManager/
-        fi
-
-        mkdir -p release/sharp/modules/Sharp.Modules.CommandManager
-        cp src/Sharp.Modules.CommandManager/bin/${{ env.CONFIGURATION }}/net10.0/Sharp.Modules.CommandManager.dll release/sharp/modules/Sharp.Modules.CommandManager/
-        if [ -f src/Sharp.Modules.CommandManager/bin/${{ env.CONFIGURATION }}/net10.0/Sharp.Modules.CommandManager.pdb ]; then
-          cp src/Sharp.Modules.CommandManager/bin/${{ env.CONFIGURATION }}/net10.0/Sharp.Modules.CommandManager.pdb release/sharp/modules/Sharp.Modules.CommandManager/
-        fi
-
-        if [ -f src/Sharp.Modules.CommandManager/bin/${{ env.CONFIGURATION }}/net10.0/Sharp.Modules.CommandManager.deps.json ]; then
-          cp src/Sharp.Modules.CommandManager/bin/${{ env.CONFIGURATION }}/net10.0/Sharp.Modules.CommandManager.deps.json release/sharp/modules/Sharp.Modules.CommandManager/
-        fi
-    
-    - name: Prepare Ptr.Shared artifact
-      run: |
-        mkdir -p release/sharp/shared/Ptr.Shared
-        cp src/Ptr.Shared/bin/${{ env.CONFIGURATION }}/net10.0/Ptr.Shared.dll release/sharp/shared/Ptr.Shared/
-        # Copy any additional files if needed
-        if [ -f src/Ptr.Shared/bin/${{ env.CONFIGURATION }}/net10.0/Ptr.Shared.pdb ]; then
-          cp src/Ptr.Shared/bin/${{ env.CONFIGURATION }}/net10.0/Ptr.Shared.pdb release/sharp/shared/Ptr.Shared/
-        fi
-
-        mkdir -p release/sharp/shared/Ptr.Modules.MapManager.Shared
-        cp src/Ptr.Modules.MapManager.Shared/bin/${{ env.CONFIGURATION }}/net10.0/Ptr.Modules.MapManager.Shared.dll release/sharp/shared/Ptr.Modules.MapManager.Shared/
-        if [ -f src/Ptr.Modules.MapManager.Shared/bin/${{ env.CONFIGURATION }}/net10.0/Ptr.Modules.MapManager.Shared.pdb ]; then
-          cp src/Ptr.Modules.MapManager.Shared/bin/${{ env.CONFIGURATION }}/net10.0/Ptr.Modules.MapManager.Shared.pdb release/sharp/shared/Ptr.Modules.MapManager.Shared/
-        fi
-
-        mkdir -p release/sharp/shared/Sharp.Modules.AdminManager.Shared
-        cp src/Sharp.Modules.AdminManager.Shared/bin/${{ env.CONFIGURATION }}/net10.0/Sharp.Modules.AdminManager.Shared.dll release/sharp/shared/Sharp.Modules.AdminManager.Shared/
-        if [ -f src/Sharp.Modules.AdminManager.Shared/bin/${{ env.CONFIGURATION }}/net10.0/Sharp.Modules.AdminManager.Shared.pdb ]; then
-          cp src/Sharp.Modules.AdminManager.Shared/bin/${{ env.CONFIGURATION }}/net10.0/Sharp.Modules.AdminManager.Shared.pdb release/sharp/shared/Sharp.Modules.AdminManager.Shared/
-        fi
-
-        mkdir -p release/sharp/shared/Sharp.Modules.CommandManager.Shared
-        cp src/Sharp.Modules.CommandManager.Shared/bin/${{ env.CONFIGURATION }}/net10.0/Sharp.Modules.CommandManager.Shared.dll release/sharp/shared/Sharp.Modules.CommandManager.Shared/
-        if [ -f src/Sharp.Modules.CommandManager.Shared/bin/${{ env.CONFIGURATION }}/net10.0/Sharp.Modules.CommandManager.Shared.pdb ]; then
-          cp src/Sharp.Modules.CommandManager.Shared/bin/${{ env.CONFIGURATION }}/net10.0/Sharp.Modules.CommandManager.Shared.pdb release/sharp/shared/Sharp.Modules.CommandManager.Shared/
-        fi
+        dotnet publish src/Ptr.Shared/Ptr.Shared.csproj --configuration ${{ env.CONFIGURATION }} --no-restore --output release/sharp/shared/Ptr.Shared /p:VersionSuffix=${{ steps.get_version.outputs.commit_count }}
+        dotnet publish src/Ptr.Modules.MapManager.Shared/Ptr.Modules.MapManager.Shared.csproj --configuration ${{ env.CONFIGURATION }} --no-restore --output release/sharp/shared/Ptr.Modules.MapManager.Shared /p:VersionSuffix=${{ steps.get_version.outputs.commit_count }}
+        dotnet publish src/Sharp.Modules.AdminManager.Shared/Sharp.Modules.AdminManager.Shared.csproj --configuration ${{ env.CONFIGURATION }} --no-restore --output release/sharp/shared/Sharp.Modules.AdminManager.Shared /p:VersionSuffix=${{ steps.get_version.outputs.commit_count }}
+        dotnet publish src/Sharp.Modules.CommandManager.Shared/Sharp.Modules.CommandManager.Shared.csproj --configuration ${{ env.CONFIGURATION }} --no-restore --output release/sharp/shared/Sharp.Modules.CommandManager.Shared /p:VersionSuffix=${{ steps.get_version.outputs.commit_count }}
 
     
     # Copy assets (gamedata, configs, etc.)
@@ -137,9 +68,11 @@ jobs:
           echo "No assets found, skipping..."
         fi
     
-    # Package Ptr.Shared for NuGet
-    - name: Pack Ptr.Shared for NuGet
-      run: dotnet pack src/Ptr.Shared/Ptr.Shared.csproj --configuration ${{ env.CONFIGURATION }} --no-build --output nupkgs /p:VersionSuffix=${{ steps.get_version.outputs.commit_count }}
+    # Package Ptr.Shared for NuGet (needs separate build)
+    - name: Build and Pack Ptr.Shared for NuGet
+      run: |
+        dotnet build src/Ptr.Shared/Ptr.Shared.csproj --configuration ${{ env.CONFIGURATION }} --no-restore /p:VersionSuffix=${{ steps.get_version.outputs.commit_count }}
+        dotnet pack src/Ptr.Shared/Ptr.Shared.csproj --configuration ${{ env.CONFIGURATION }} --no-build --output nupkgs /p:VersionSuffix=${{ steps.get_version.outputs.commit_count }}
     
     # Get the actual version that was built
     - name: Get built version
