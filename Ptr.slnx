@@ -1,7 +1,13 @@
 <Solution>
   <Folder Name="/src/">
     <File Path="src/Directory.Build.props" />
+    <Project Path="src/Ptr.Modules.MapManager.Shared/Ptr.Modules.MapManager.Shared.csproj" />
+    <Project Path="src/Ptr.Modules.MapManager/Ptr.Modules.MapManager.csproj" />
     <Project Path="src/Ptr.Shared/Ptr.Shared.csproj" />
     <Project Path="src/Ptr/Ptr.csproj" />
+    <Project Path="src/Sharp.Modules.AdminManager.Shared/Sharp.Modules.AdminManager.Shared.csproj" />
+    <Project Path="src/Sharp.Modules.AdminManager/Sharp.Modules.AdminManager.csproj" />
+    <Project Path="src/Sharp.Modules.CommandManager.Shared/Sharp.Modules.CommandManager.Shared.csproj" />
+    <Project Path="src/Sharp.Modules.CommandManager/Sharp.Modules.CommandManager.csproj" />
   </Folder>
 </Solution>
