@@ -50,9 +50,10 @@ jobs:
         dotnet build src/Sharp.Modules.CommandManager/Sharp.Modules.CommandManager.csproj --configuration ${{ env.CONFIGURATION }} --no-restore /p:VersionSuffix=${{ steps.get_version.outputs.commit_count }}
     
     - name: Build Ptr.Shared
-      run: dotnet build src/Ptr.Shared/Ptr.Shared.csproj --configuration ${{ env.CONFIGURATION }} --no-restore /p:VersionSuffix=${{ steps.get_version.outputs.commit_count }}
-      run: dotnet build src/Sharp.Modules.AdminManager.Shared/Sharp.Modules.AdminManager.Shared.csproj --configuration ${{ env.CONFIGURATION }} --no-restore /p:VersionSuffix=${{ steps.get_version.outputs.commit_count }}
-      run: dotnet build src/Sharp.Modules.CommandManager.Shared/Sharp.Modules.CommandManager.Shared.csproj --configuration ${{ env.CONFIGURATION }} --no-restore /p:VersionSuffix=${{ steps.get_version.outputs.commit_count }}
+      run: |
+        dotnet build src/Ptr.Shared/Ptr.Shared.csproj --configuration ${{ env.CONFIGURATION }} --no-restore /p:VersionSuffix=${{ steps.get_version.outputs.commit_count }}
+        dotnet build src/Sharp.Modules.AdminManager.Shared/Sharp.Modules.AdminManager.Shared.csproj --configuration ${{ env.CONFIGURATION }} --no-restore /p:VersionSuffix=${{ steps.get_version.outputs.commit_count }}
+        dotnet build src/Sharp.Modules.CommandManager.Shared/Sharp.Modules.CommandManager.Shared.csproj --configuration ${{ env.CONFIGURATION }} --no-restore /p:VersionSuffix=${{ steps.get_version.outputs.commit_count }}
     
     # Prepare release artifacts
     - name: Prepare Ptr module artifact
