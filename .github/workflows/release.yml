@@ -65,10 +65,18 @@ jobs:
           cp src/Ptr/bin/${{ env.CONFIGURATION }}/net10.0/Ptr.pdb release/sharp/modules/Ptr/
         fi
 
+        if [ -f src/Ptr/bin/${{ env.CONFIGURATION }}/net10.0/Ptr.deps.json ]; then
+          cp src/Ptr/bin/${{ env.CONFIGURATION }}/net10.0/Ptr.deps.json release/sharp/modules/Ptr/
+        fi
+
         mkdir -p release/sharp/modules/Ptr.Modules.MapManager
         cp src/Ptr.Modules.MapManager/bin/${{ env.CONFIGURATION }}/net10.0/Ptr.Modules.MapManager.dll release/sharp/modules/Ptr.Modules.MapManager/
         if [ -f src/Ptr.Modules.MapManager/bin/${{ env.CONFIGURATION }}/net10.0/Ptr.Modules.MapManager.pdb ]; then
           cp src/Ptr.Modules.MapManager/bin/${{ env.CONFIGURATION }}/net10.0/Ptr.Modules.MapManager.pdb release/sharp/modules/Ptr.Modules.MapManager/
+        fi
+
+        if [ -f src/Ptr.Modules.MapManager/bin/${{ env.CONFIGURATION }}/net10.0/Ptr.Modules.MapManager.deps.json ]; then
+          cp src/Ptr.Modules.MapManager/bin/${{ env.CONFIGURATION }}/net10.0/Ptr.Modules.MapManager.deps.json release/sharp/modules/Ptr.Modules.MapManager/
         fi
 
         mkdir -p release/sharp/modules/Sharp.Modules.AdminManager
@@ -77,10 +85,18 @@ jobs:
           cp src/Sharp.Modules.AdminManager/bin/${{ env.CONFIGURATION }}/net10.0/Sharp.Modules.AdminManager.pdb release/sharp/modules/Sharp.Modules.AdminManager/
         fi
 
+        if [ -f src/Sharp.Modules.AdminManager/bin/${{ env.CONFIGURATION }}/net10.0/Sharp.Modules.AdminManager.deps.json ]; then
+          cp src/Sharp.Modules.AdminManager/bin/${{ env.CONFIGURATION }}/net10.0/Sharp.Modules.AdminManager.deps.json release/sharp/modules/Sharp.Modules.AdminManager/
+        fi
+
         mkdir -p release/sharp/modules/Sharp.Modules.CommandManager
         cp src/Sharp.Modules.CommandManager/bin/${{ env.CONFIGURATION }}/net10.0/Sharp.Modules.CommandManager.dll release/sharp/modules/Sharp.Modules.CommandManager/
         if [ -f src/Sharp.Modules.CommandManager/bin/${{ env.CONFIGURATION }}/net10.0/Sharp.Modules.CommandManager.pdb ]; then
           cp src/Sharp.Modules.CommandManager/bin/${{ env.CONFIGURATION }}/net10.0/Sharp.Modules.CommandManager.pdb release/sharp/modules/Sharp.Modules.CommandManager/
+        fi
+
+        if [ -f src/Sharp.Modules.CommandManager/bin/${{ env.CONFIGURATION }}/net10.0/Sharp.Modules.CommandManager.deps.json ]; then
+          cp src/Sharp.Modules.CommandManager/bin/${{ env.CONFIGURATION }}/net10.0/Sharp.Modules.CommandManager.deps.json release/sharp/modules/Sharp.Modules.CommandManager/
         fi
     
     - name: Prepare Ptr.Shared artifact
