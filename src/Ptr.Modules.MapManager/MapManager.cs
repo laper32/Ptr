@@ -146,6 +146,7 @@ internal class MapManager : IModSharpModule, IMapManager, IGameListener
 
         _voteSuccessRatio = _bridge.ConVarManager.CreateConVar("mapmanager_vote_success_ratio", 0.6f,
             "Ratio request for a success vote.");
+        _provider.CallPostInit<IModule>(e => { _logger.LogError(e, "An error occurred when initializing modules"); });
         _bridge.SharpModuleManager.RegisterSharpModuleInterface<IMapManager>(this, IMapManager.Identity, this);
     }
 

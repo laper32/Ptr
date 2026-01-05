@@ -28,6 +28,11 @@ internal class RtvService : IRtvService, IGameListener, IClientListener
 
     private void AttemptRtv(IGameClient client)
     {
+        if (_enableRtv is null)
+        {
+            _logger.LogWarning("RTV ConVar is not initialized.");
+            return;
+        }
         if (_enableRtv?.GetBool() is not true)
         {
             _logger.LogInformation("RTV is disabled, skip RTV attempt.");
@@ -116,7 +121,7 @@ internal class RtvService : IRtvService, IGameListener, IClientListener
     }
     public void OnPostInit()
     {
-        _enableRtv = _bridge.ConVarManager.CreateConVar("mapmanager_enable_rtv", true, "Enable RTV");
+        _enableRtv = _bridge.ConVarManager.CreateConVar("mapmanager_enable_rtv", true, "Enable RTV", ConVarFlags.Release);
     }
 
     public void OnAllModulesLoaded()
@@ -161,10 +166,8 @@ internal class RtvService : IRtvService, IGameListener, IClientListener
     public ECommandAction OnClientSayCommand(IGameClient client, bool teamOnly, bool isCommand, string commandName,
         string message)
     {
-        _logger.LogInformation("Client {ClientSlot} said: {Message}", client.Slot, message);
         if (message.Split().ElementAtOrDefault(0)?.Equals("rtv", StringComparison.OrdinalIgnoreCase) is true)
         {
-            _logger.LogInformation("Client {ClientSlot} is attempting to RTV.", client.Slot);
             AttemptRtv(client);
         }
 

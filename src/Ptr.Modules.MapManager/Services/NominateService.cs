@@ -4,6 +4,7 @@ using Ptr.Shared.Hosting;
 using Sharp.Modules.CommandManager.Shared;
 using Sharp.Modules.LocalizerManager.Shared;
 using Sharp.Shared.Definition;
+using Sharp.Shared.Enums;
 using Sharp.Shared.Objects;
 using Sharp.Shared.Types;
 
@@ -13,10 +14,11 @@ internal interface INominateService : IModule;
 
 internal class NominateService : INominateService
 {
-    private readonly IConVar? _activateNominateMinPlayers;
     private readonly InterfaceBridge _bridge;
 
-    private readonly IConVar? _enableNominate;
+    private IConVar? _enableNominate;
+    private IConVar? _activateNominateMinPlayers;
+
     private readonly ILogger<NominateService> _logger;
     private ILocalizerManager _localizerManager = null!;
 
@@ -24,15 +26,18 @@ internal class NominateService : INominateService
     {
         _bridge = bridge;
         _logger = logger;
-
-        _enableNominate = _bridge.ConVarManager.CreateConVar("mapmanager_enable_nominate", true, "Enable nominate");
-        _activateNominateMinPlayers = _bridge.ConVarManager.CreateConVar("mapmanager_activate_nominate_min_players", 5,
-            "minimal players count to activate nominate.");
     }
 
     public void OnInit()
     {
         _logger.LogInformation("Nomination is enabled.");
+    }
+
+    public void OnPostInit()
+    {
+        _enableNominate = _bridge.ConVarManager.CreateConVar("mapmanager_enable_nominate", true, "Enable nominate", ConVarFlags.Release);
+        _activateNominateMinPlayers = _bridge.ConVarManager.CreateConVar("mapmanager_activate_nominate_min_players", 5,
+            "minimal players count to activate nominate.", ConVarFlags.Release);
     }
 
     public void OnAllModulesLoaded()

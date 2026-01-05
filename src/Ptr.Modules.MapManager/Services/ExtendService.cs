@@ -120,11 +120,11 @@ internal class ExtendService : IExtendService, IClientListener, IGameListener
     #region IModule
     public void OnPostInit()
     {
-        _enableExtend = _bridge!.ConVarManager.CreateConVar("mapmanager_enable_extend", true, "Enable ext");
+        _enableExtend = _bridge!.ConVarManager.CreateConVar("mapmanager_enable_extend", true, "Enable ext", ConVarFlags.Release);
         _maxExtCount = _bridge!.ConVarManager.CreateConVar("mapmanager_max_extend_count", 3,
-            "Maximum allowed extend map time limit count.");
+            "Maximum allowed extend map time limit count.", ConVarFlags.Release);
         _extendTime =
-            _bridge!.ConVarManager.CreateConVar("mapmanager_ext_time", 15, "The extend applies for time limit.");
+            _bridge!.ConVarManager.CreateConVar("mapmanager_ext_time", 15, "The extend applies for time limit.", ConVarFlags.Release);
     }
     public void OnInit()
     {
