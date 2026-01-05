@@ -31,6 +31,14 @@ internal class RtvService : IRtvService, IGameListener, IClientListener
 
     private void AttemptRtv(IGameClient client)
     {
+        if (_enableRtv?.GetBool() is not true)
+        {
+            return;
+        }
+        if (_localizerManager is null)
+        {
+            throw new InvalidOperationException("LocalizerManager is not initialized.");
+        }
         _localizerManager.TryGetLocalizer(client, out var _localizer);
         if (_localizer is null)
         {
@@ -118,23 +126,12 @@ internal class RtvService : IRtvService, IGameListener, IClientListener
 
     public void OnAllModulesLoaded()
     {
-        if (_enableRtv?.GetBool() is not true)
-        {
-            return;
-        }
-
         _localizerManager = _bridge.SharpModuleManager
             .GetRequiredSharpModuleInterface<ILocalizerManager>(ILocalizerManager.Identity).Instance!;
     }
 
     public void OnShutdown()
     {
-        if (_enableRtv?.GetBool() is not true)
-        {
-            _logger.LogInformation("RTV is disabled, skip shutdown.");
-            return;
-        }
-
         _bridge.ModSharp.RemoveGameListener(this);
         _bridge.ClientManager.RemoveClientListener(this);
         ResetRtvState();
