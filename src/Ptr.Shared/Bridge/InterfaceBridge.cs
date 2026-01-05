@@ -49,14 +49,14 @@ internal class InterfaceBridge
     public IModSharp ModSharp => _sharedSystem.GetModSharp();
 
     /// <summary>
-    ///     CGlobalVars* gpGlobals，没什么好说的。<br />
-    ///     注意，一定要在地图加载之后调用！不然服务器第一次加载的时候是拿不到的！
+    ///     CGlobalVars* gpGlobals.<br />
+    ///     Note: Must be called after the map is loaded! Otherwise it won't be available on the server's first load!
     /// </summary>
     public IGlobalVars GlobalVars => ModSharp.GetGlobals();
 
     /// <summary>
     ///     CGameRules* g_pGameRules <br />
-    ///     注意，一定要在地图加载之后调用！不然服务器第一次加载的时候是拿不到的！
+    ///     Note: Must be called after the map is loaded! Otherwise it won't be available on the server's first load!
     /// </summary>
     public IGameRules GameRules => ModSharp.GetGameRules();
 

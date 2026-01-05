@@ -50,7 +50,7 @@ internal class MapVoteService : IMapVoteService, IGameListener
 
     private void OnMapVoteCreated(IMapVoteCreatedForwardParams @params)
     {
-        // GetMapGroupMapList的索引是可以直接和EndMatchMapGroupVoteOptions对应的
+        // The index of GetMapGroupMapList directly corresponds to EndMatchMapGroupVoteOptions
         if (_bridge.ModSharp.GetMapGroupMapList(_bridge.CurrentMapGroup) is not { } mapGroupElements)
         {
             _logger.LogInformation("Current map group {CurrentMapGroup} cannot retrive map list, check your map group configuration!", _bridge.CurrentMapGroup);
@@ -174,7 +174,7 @@ internal class MapVoteService : IMapVoteService, IGameListener
 
     private void SummaryVote()
     {
-        // GetMapGroupMapList的索引是可以直接和EndMatchMapGroupVoteOptions对应的
+        // The index of GetMapGroupMapList directly corresponds to EndMatchMapGroupVoteOptions
         if (_bridge.ModSharp.GetMapGroupMapList(_bridge.CurrentMapGroup) is not { } mapGroupElements)
         {
             return;

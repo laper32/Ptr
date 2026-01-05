@@ -5,11 +5,11 @@ using Microsoft.Extensions.Logging;
 using Ptr.Modules.MapManager.Hooks;
 using Ptr.Modules.MapManager.Services;
 using Ptr.Modules.MapManager.Shared;
-using Ptr.Shared.Extensions;
 using Ptr.Shared.Hooks.Hosting;
 using Ptr.Shared.Hooks.Managers;
 using Ptr.Shared.Hosting;
 using Ptr.Shared.Misc;
+using Sharp.Modules.LocalizerManager.Shared;
 using Sharp.Shared;
 using Sharp.Shared.Abstractions;
 using Sharp.Shared.Listeners;
@@ -20,10 +20,11 @@ namespace Ptr.Modules.MapManager;
 internal class MapManager : IModSharpModule, IMapManager, IGameListener
 {
     private readonly InterfaceBridge _bridge;
-    private readonly IConVar? _countdownAfterChangeLevel;
     private readonly ILogger<MapManager> _logger;
     private readonly IServiceProvider _provider;
-    private readonly IConVar? _voteSuccessRatio;
+    private IConVar? _chatFormatPrefix;
+    private IConVar? _voteSuccessRatio;
+    private IConVar? _countdownAfterChangeLevel;
 
     public MapManager(
         ISharedSystem sharedSystem,
@@ -34,7 +35,7 @@ internal class MapManager : IModSharpModule, IMapManager, IGameListener
         bool hotReload)
     {
         var formatter = new ChatMessageFormatter();
-        formatter.SetPrefix("{green}[地图]{white}");
+        formatter.SetPrefix("{whitespace}{green}MAP{white}{whitespace}");
         var bridge = new InterfaceBridge(sharedSystem, dllPath, sharpPath, version, configuration, hotReload, formatter,
             this);
         var services = new ServiceCollection();
@@ -55,12 +56,6 @@ internal class MapManager : IModSharpModule, IMapManager, IGameListener
         _logger = sharedSystem.GetLoggerFactory().CreateLogger<MapManager>();
 
         _provider = provider;
-
-        _countdownAfterChangeLevel = _bridge.ConVarManager.CreateConVar("mapmanager_countdown_after_changelevel", 180,
-            "Countdown after map change (unit is sec.)");
-
-        _voteSuccessRatio = _bridge.ConVarManager.CreateConVar("mapmanager_vote_success_ratio", 0.6f,
-            "Ratio request for a success vote.");
     }
 
     internal int GetVoteSuccessNumberRequested()
@@ -142,7 +137,25 @@ internal class MapManager : IModSharpModule, IMapManager, IGameListener
 
     public void PostInit()
     {
+        // Safest place to init convars is PostInit 
+        _chatFormatPrefix = _bridge.ConVarManager.CreateConVar("mapmanager_format_prefix", "{green}[MAP]{white}",
+            "Chat prefix format for map manager module.");
+        
+        // Real time prefix changes
+        if (_chatFormatPrefix is not null)
+            _bridge.ConVarManager.InstallChangeHook(_chatFormatPrefix, OnChatFormatPrefixChange);
+
+        _countdownAfterChangeLevel = _bridge.ConVarManager.CreateConVar("mapmanager_countdown_after_changelevel", 180,
+            "Countdown after map change (unit is sec.)");
+
+        _voteSuccessRatio = _bridge.ConVarManager.CreateConVar("mapmanager_vote_success_ratio", 0.6f,
+            "Ratio request for a success vote.");
         _bridge.SharpModuleManager.RegisterSharpModuleInterface<IMapManager>(this, IMapManager.Identity, this);
+    }
+
+    private void OnChatFormatPrefixChange(IConVar conVar)
+    {
+        _bridge.ChatFormatter.SetPrefix(conVar.GetString());
     }
 
     public void OnLibraryConnected(string name)
@@ -156,6 +169,10 @@ internal class MapManager : IModSharpModule, IMapManager, IGameListener
     public void OnAllModulesLoaded()
     {
         CallMapConfigLoaded();
+
+        var _localizerManager = _bridge.SharpModuleManager
+            .GetRequiredSharpModuleInterface<ILocalizerManager>(ILocalizerManager.Identity).Instance!;
+        _localizerManager.LoadLocaleFile("Ptr.Modules.MapManager");
     }
 
     public void Shutdown()
@@ -165,6 +182,10 @@ internal class MapManager : IModSharpModule, IMapManager, IGameListener
         _provider.ShutdownAllSharpExtensions();
         _bridge.Maps.Clear();
         MapConfigLoaded = null;
+        if (_chatFormatPrefix is not null)
+        {
+            _bridge.ConVarManager.RemoveChangeHook(_chatFormatPrefix, OnChatFormatPrefixChange);
+        }
     }
 
     string IModSharpModule.DisplayName => "Ptr.Modules.MapManager";
@@ -226,6 +247,11 @@ internal class MapManager : IModSharpModule, IMapManager, IGameListener
     public void OnServerActivate()
     {
         _bridge.AllowVoteTime = DateTime.Now.AddSeconds(_countdownAfterChangeLevel?.GetInt32() ?? 180);
+        // On this step we already executed .cfg files
+        if (_chatFormatPrefix is not null) 
+        {
+            _bridge.ChatFormatter.SetPrefix(_chatFormatPrefix.GetString());
+        }
     }
 
     int IGameListener.ListenerPriority => 0;

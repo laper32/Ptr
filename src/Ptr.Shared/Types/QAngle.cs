@@ -154,7 +154,7 @@ public struct QAngle(float pitch, float yaw, float roll)
     }
 
     /// <summary>
-    ///     常规化
+    ///     Normalize
     /// </summary>
     public void Normalize()
     {

@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Ptr.Shared.Extensions;
 using Ptr.Shared.Hosting;
 using Sharp.Modules.CommandManager.Shared;
+using Sharp.Modules.LocalizerManager.Shared;
 using Sharp.Shared.Definition;
 using Sharp.Shared.Objects;
 using Sharp.Shared.Types;
@@ -17,6 +18,7 @@ internal class NominateService : INominateService
 
     private readonly IConVar? _enableNominate;
     private readonly ILogger<NominateService> _logger;
+    private ILocalizerManager _localizerManager = null!;
 
     public NominateService(InterfaceBridge bridge, ILogger<NominateService> logger)
     {
@@ -51,6 +53,9 @@ internal class NominateService : INominateService
             .Instance!
             .GetRegistry(_bridge.ModuleIdentity)
             .RegisterClientCommand("nominate", OnCommandNominate);
+
+        _localizerManager = _bridge.SharpModuleManager
+            .GetRequiredSharpModuleInterface<ILocalizerManager>(ILocalizerManager.Identity).Instance!;
     }
 
     public void OnShutdown()
@@ -65,51 +70,70 @@ internal class NominateService : INominateService
 
     private void OnCommandNominate(IGameClient client, StringCommand command)
     {
+        _localizerManager.TryGetLocalizer(client, out var _localizer);
+        if (_localizer is null)
+        {
+            _logger.LogWarning("Localizer not found for client {ClientSlot} when executing nominate command.",
+                client.Slot);
+            return;
+        }
+
         var clientsCount = _bridge.Server.GetGameClients(true, true).Count;
         var leastActivateNominateCount = _activateNominateMinPlayers?.GetInt32() ?? 5;
 
         if (clientsCount < leastActivateNominateCount)
         {
             client.PrintToChat(_bridge.ChatFormatter.Format(
-                $"当前在线人数不足 {ChatColor.Green}{leastActivateNominateCount}{ChatColor.White} 人，无法提名地图。"));
+                _localizer.Format("ptr.mapmanager.nominate_not_enough_players", leastActivateNominateCount)));
             return;
         }
 
         if (command.ArgCount < 1)
         {
-            client.PrintToChat(_bridge.ChatFormatter.Format("用法：.nominate <地图名>"));
+            client.PrintToChat(_bridge.ChatFormatter.Format(_localizer.Format("ptr.mapmanager.nominate_usage")));
             return;
         }
 
         var map = command[1];
         if (_bridge.NominatedMaps.Contains(map, StringComparer.OrdinalIgnoreCase))
         {
-            client.PrintToChat("该地图已经被提名过了。");
+            client.PrintToChat(_bridge.ChatFormatter.Format(_localizer.Format("ptr.mapmanager.map_already_nominated")));
             return;
         }
 
         if (_bridge.PreviousGameMaps.Exists(x => x.MapName.Equals(map, StringComparison.OrdinalIgnoreCase)))
         {
-            client.PrintToChat("该地图最近已经玩过了，目前无法提名。");
+            client.PrintToChat(_bridge.ChatFormatter.Format(_localizer.Format("ptr.mapmanager.map_recently_played")));
             return;
         }
 
         if (_bridge.Maps.Exists(x => x.MapName.Equals(map, StringComparison.OrdinalIgnoreCase)))
         {
-            client.PrintToChat("无法从图池中找到该地图。");
+            client.PrintToChat(_bridge.ChatFormatter.Format(_localizer.Format("ptr.mapmanager.map_not_found")));
             return;
         }
 
         var currentMap = _bridge.GlobalVars.MapName;
         if (currentMap.Equals(map, StringComparison.OrdinalIgnoreCase))
         {
-            client.PrintToChat("不能投票正在游玩的地图。");
+            client.PrintToChat(_bridge.ChatFormatter.Format(_localizer.Format("ptr.mapmanager.cannot_nominate_current_map")));
             return;
         }
 
         _bridge.NominatedMaps.Add(map);
-        _bridge.ModSharp.PrintToChatAll(_bridge.ChatFormatter.Format(
-            $"{ChatColor.Green}{client.Name}{ChatColor.White} 提名了地图 {ChatColor.Green}{map}{ChatColor.White}。"));
+        var allClients = _bridge.ClientManager.GetGameClients(true);
+        foreach (var c in allClients)
+        {
+            _localizerManager.TryGetLocalizer(c, out var _tempLocalizer);
+            if (_tempLocalizer is null)
+            {
+                _logger.LogWarning("Localizer not found for client {ClientSlot} when broadcasting nomination.",
+                    c.Slot);
+                continue;
+            }
+            c.PrintToChat(
+                _bridge.ChatFormatter.Format(_tempLocalizer.Format("ptr.mapmanager.player_nominated_map", client.Name, map)));
+        }
 
         _logger.LogInformation("{ClientName} nominated {Map}", client.Name, map);
     }

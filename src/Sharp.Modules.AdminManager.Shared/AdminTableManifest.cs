@@ -16,24 +16,24 @@ namespace Sharp.Modules.AdminManager.Shared;
      "users": [
        {
          "user_id": "u100",
-         // 权限数组：@开头表示继承角色，其他表示直接权限
+         // Permission array: @ prefix means inherit from role, others are direct permissions
          "permissions": ["@global_root", "!pluginB:slay"]
-         // 解析后：global_root的所有权限（*） + 直接拒绝pluginB:slay
+         // Resolved: all permissions from global_root (*) + directly deny pluginB:slay
        },
        {
          "user_id": "u104",
          "permissions": ["@pluginA_admin", "@pluginB_kicker"]
-         // 解析后：pluginA:*（插件A所有） + pluginB:kick（插件B踢人）
+         // Resolved: pluginA:* (all of plugin A) + pluginB:kick (plugin B kick)
        },
        {
          "user_id": "u105",
          "permissions": ["pluginA:getWeapon", "!pluginA:fetchItems"]
-         // 解析后：仅直接允许getWeapon + 直接拒绝fetchItems（不继承任何角色）
+         // Resolved: only directly allow getWeapon + directly deny fetchItems (no role inheritance)
        },
        {
          "user_id": "u106",
          "permissions": ["@pluginA_admin", "pluginB:slay"]
-         // 解析后：pluginA:*（来自角色） + 直接允许pluginB:slay
+         // Resolved: pluginA:* (from role) + directly allow pluginB:slay
        }
      ]
    }*/

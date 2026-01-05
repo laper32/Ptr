@@ -49,7 +49,10 @@ internal static class ChatMessageFormatterExtensions
         { "{blue}", ChatColor.Blue },
         { "{darkblue}", ChatColor.DarkBlue },
         { "{purple}", ChatColor.Purple },
-        { "{lightred}", ChatColor.LightRed }
+        { "{lightred}", ChatColor.LightRed },
+        { "{muted}", ChatColor.Muted },
+        { "{head}", ChatColor.Head },
+        { "{whitespace}", "\u00A0" }
     };
 
     extension(string self)

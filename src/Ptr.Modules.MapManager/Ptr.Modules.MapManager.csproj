@@ -10,6 +10,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\Ptr.Modules.MapManager.Shared\Ptr.Modules.MapManager.Shared.csproj" Private="false" ExcludeAssets="runtime" />
 		<ProjectReference Include="..\Sharp.Modules.CommandManager.Shared\Sharp.Modules.CommandManager.Shared.csproj" Private="false" ExcludeAssets="runtime" />
+		<PackageReference Include="ModSharp.Sharp.Modules.LocalizerManager.Shared" Version="2.1.93" PrivateAssets="all"/>
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Ptr.Shared\Ptr.Shared.csproj" Private="false" ExcludeAssets="all" />

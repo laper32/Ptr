@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Ptr.Shared.Extensions;
 using Ptr.Shared.Hosting;
 using Sharp.Modules.CommandManager.Shared;
+using Sharp.Modules.LocalizerManager.Shared;
 using Sharp.Shared.Definition;
 using Sharp.Shared.Enums;
 using Sharp.Shared.Listeners;
@@ -16,13 +17,13 @@ internal class ExtendService : IExtendService, IClientListener, IGameListener
 {
     private readonly InterfaceBridge _bridge;
     private readonly IConVar? _enableExtend;
-
-    private readonly bool[] _extClients = new bool[64];
     private readonly IConVar? _extendTime;
-    private readonly ILogger<ExtendService> _logger;
     private readonly IConVar? _maxExtCount;
+    private readonly bool[] _extClients = new bool[64];
+    private readonly ILogger<ExtendService> _logger;
     private int _extCount;
     private ICommandRegistry _commandRegistry = null!;
+    private ILocalizerManager _localizerManager = null!;
 
     public ExtendService(InterfaceBridge bridge, ILogger<ExtendService> logger)
     {
@@ -37,24 +38,31 @@ internal class ExtendService : IExtendService, IClientListener, IGameListener
 
     private void OnCommandExt(IGameClient client, StringCommand command)
     {
+        _localizerManager.TryGetLocalizer(client, out var _localizer);
+        if (_localizer is null)
+        {
+            _logger.LogWarning("Localizer not found for client {ClientSlot} when executing ext command.",
+                client.Slot);
+            return;
+        }
         var remaining = (int)(_bridge.AllowVoteTime - DateTime.Now).TotalSeconds;
         if (remaining > 0)
         {
             client.PrintToChat(
-                _bridge.ChatFormatter.Format($"{ChatColor.Green}{remaining}{ChatColor.White} 秒后才能发起延长地图时间投票。"));
+                _bridge.ChatFormatter.Format(_localizer.Format("ptr.mapmanager.extend_map_after_x", remaining)));
             return;
         }
 
         var maxAllowed = _maxExtCount!.GetInt32();
         if (_extCount >= maxAllowed)
         {
-            client.PrintToChat(_bridge.ChatFormatter.Format("已到达最大可延长时间次数。"));
+            client.PrintToChat(_bridge.ChatFormatter.Format(_localizer.Format("ptr.mapmanager.max_extends_reached")));
             return;
         }
 
         if (_extClients[client.Slot])
         {
-            client.PrintToChat("你已经投票过延长地图时间了。");
+            client.PrintToChat(_bridge.ChatFormatter.Format(_localizer.Format("ptr.mapmanager.you_already_voted_to_extend")));
             return;
         }
 
@@ -63,13 +71,24 @@ internal class ExtendService : IExtendService, IClientListener, IGameListener
         var request = _bridge.MapManager.GetVoteSuccessNumberRequested();
         var clientGaps = request - current;
         client.PrintToChat(
-            $"已有 {ChatColor.Green}{current}{ChatColor.White} 人投票延长地图时间，还需 {ChatColor.Green}{clientGaps}{ChatColor.White} 票。");
+            _bridge.ChatFormatter.Format(_localizer.Format("ptr.mapmanager.extend_vote_progress", current, clientGaps)));
         if (clientGaps > 0)
         {
             return;
         }
-
-        _bridge.ModSharp.PrintToChatAll("投票通过，即将延长地图持续时间。");
+        var allClients = _bridge.ClientManager.GetGameClients(true);
+        foreach (var c in allClients)
+        {
+            _localizerManager.TryGetLocalizer(client, out var _tempLocalizer);
+            if (_tempLocalizer is null)
+            {
+                _logger.LogWarning("Localizer not found for client {ClientSlot} when executing ext command.",
+                    c.Slot);
+                continue;
+            }
+            c.PrintToChat(
+                _bridge.ChatFormatter.Format(_tempLocalizer.Format("ptr.mapmanager.extend_vote_passed")));
+        }
         var timeLimit = _bridge.ConVarManager.FindConVar("mp_timelimit")!;
         var currentTimeLeft = timeLimit.GetFloat();
         var pendingExtendTime = _extendTime?.GetFloat() ?? 15.0f;
@@ -118,6 +137,9 @@ internal class ExtendService : IExtendService, IClientListener, IGameListener
             .GetRegistry(_bridge.ModuleIdentity);
 
         _commandRegistry.RegisterClientCommand("ext", OnCommandExt);
+
+        _localizerManager = _bridge.SharpModuleManager
+            .GetRequiredSharpModuleInterface<ILocalizerManager>(ILocalizerManager.Identity).Instance!;
     }
 
     public void OnShutdown()

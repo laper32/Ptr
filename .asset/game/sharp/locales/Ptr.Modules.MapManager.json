@@ -1,0 +1,66 @@
+{
+  "ptr.mapmanager.extend_map_after_x": {
+    "en-us": "A vote to extend the map time can only be initiated after {green}{0}{white} seconds.",
+    "zh-cn": "{green}{0}{white} 秒后才能发起延长地图时间投票. "
+  },
+  "ptr.mapmanager.max_extends_reached": {
+    "en-us": "The maximum number of times the time can be extended has been reached.",
+    "zh-cn": "已到达最大可延长时间次数。"
+  },
+  "ptr.mapmanager.you_already_voted_to_extend": {
+    "en-us": "You have already voted to extend the map time.",
+    "zh-cn": "你已经投票过延长地图时间了。"
+  },
+  "ptr.mapmanager.extend_vote_progress": {
+    "en-us": "{green}{0}{white} players have voted to extend the map time, {green}{1}{white} more votes needed.",
+    "zh-cn": "已有 {green}{0}{white} 人投票延长地图时间，还需 {green}{1}{white} 票。"
+  },
+  "ptr.mapmanager.extend_vote_passed": {
+    "en-us": "Vote passed, the map time will be extended.",
+    "zh-cn": "投票通过，即将延长地图持续时间。"
+  },
+  "ptr.mapmanager.nominate_not_enough_players": {
+    "en-us": "At least {green}{0}{white} players are required to nominate maps.",
+    "zh-cn": "当前在线人数不足 {green}{0}{white} 人，无法提名地图。"
+  },
+  "ptr.mapmanager.nominate_usage": {
+    "en-us": "Usage: .nominate <map name>",
+    "zh-cn": "用法：.nominate <地图名>"
+  },
+  "ptr.mapmanager.map_already_nominated": {
+    "en-us": "This map has already been nominated.",
+    "zh-cn": "该地图已经被提名过了。"
+  },
+  "ptr.mapmanager.map_recently_played": {
+    "en-us": "This map was played recently and cannot be nominated.",
+    "zh-cn": "该地图最近已经玩过了，目前无法提名。"
+  },
+  "ptr.mapmanager.map_not_found": {
+    "en-us": "Cannot find this map in the map pool.",
+    "zh-cn": "无法从图池中找到该地图。"
+  },
+  "ptr.mapmanager.cannot_nominate_current_map": {
+    "en-us": "Cannot nominate the current map.",
+    "zh-cn": "不能投票正在游玩的地图。"
+  },
+  "ptr.mapmanager.player_nominated_map": {
+    "en-us": "{green}{0}{white} nominated map {green}{1}{white}.",
+    "zh-cn": "{green}{0}{white} 提名了地图 {green}{1}{white}。"
+  },
+  "ptr.mapmanager.rtv_after_x": {
+    "en-us": "A vote to change the map can only be initiated after {green}{0}{white} seconds.",
+    "zh-cn": "{green}{0}{white} 秒后才能发起换图投票。"
+  },
+  "ptr.mapmanager.already_voted_rtv": {
+    "en-us": "You have already voted to change the map!",
+    "zh-cn": "你已经投票过换图了！"
+  },
+  "ptr.mapmanager.rtv_vote_progress": {
+    "en-us": "{green}{0}{white} players have voted to change the map, {green}{1}{white} more votes needed.",
+    "zh-cn": "已有 {green}{0}{white} 人投票换图，还需 {green}{1}{white} 票。"
+  },
+  "ptr.mapmanager.rtv_vote_passed": {
+    "en-us": "RTV vote passed! Map voting will start after this round ends.",
+    "zh-cn": "投票换图通过！将在回合结束后开始投票。"
+  }
+}
