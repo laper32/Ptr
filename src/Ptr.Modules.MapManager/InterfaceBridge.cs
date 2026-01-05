@@ -69,7 +69,7 @@ internal class InterfaceBridge
         CoreConfiguration = coreConfiguration;
         IsHotReload = hotReload;
         ChatFormatter = formatter;
-        ModuleIdentity = Path.GetFileName(dllPath);
+        ModuleIdentity = Path.GetFileNameWithoutExtension(dllPath);
         Instance = this;
     }
 
