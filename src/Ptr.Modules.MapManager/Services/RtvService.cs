@@ -127,7 +127,8 @@ internal class RtvService : IRtvService, IGameListener, IClientListener
     public void OnAllModulesLoaded()
     {
         _localizerManager = _bridge.SharpModuleManager
-            .GetRequiredSharpModuleInterface<ILocalizerManager>(ILocalizerManager.Identity).Instance!;
+            .GetRequiredSharpModuleInterface<ILocalizerManager>(ILocalizerManager.Identity)
+            .Instance!;
     }
 
     public void OnShutdown()

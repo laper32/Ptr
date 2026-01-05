@@ -143,7 +143,8 @@ internal class ExtendService : IExtendService, IClientListener, IGameListener
         _commandRegistry.RegisterClientCommand("ext", OnCommandExt);
 
         _localizerManager = _bridge.SharpModuleManager
-            .GetRequiredSharpModuleInterface<ILocalizerManager>(ILocalizerManager.Identity).Instance!;
+            .GetRequiredSharpModuleInterface<ILocalizerManager>(ILocalizerManager.Identity)
+            .Instance!;
     }
 
     public void OnShutdown()

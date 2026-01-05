@@ -49,6 +49,9 @@ internal class NominateService : INominateService
             .GetRegistry(_bridge.ModuleIdentity)
             .RegisterClientCommand("nominate", OnCommandNominate);
 
+        _localizerManager = _bridge.SharpModuleManager
+            .GetRequiredSharpModuleInterface<ILocalizerManager>(ILocalizerManager.Identity)
+            .Instance!;
     }
 
     public void OnShutdown()
@@ -58,6 +61,11 @@ internal class NominateService : INominateService
 
     private void OnCommandNominate(IGameClient client, StringCommand command)
     {
+        if (_enableNominate is null)
+        {
+            _logger.LogWarning("Enabled Nominate ConVar is not initialized.");
+            return;
+        }
         if (_enableNominate?.GetBool() is not true)
         {
             return;
