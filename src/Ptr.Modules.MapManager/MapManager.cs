@@ -35,7 +35,6 @@ internal class MapManager : IModSharpModule, IMapManager, IGameListener
         bool hotReload)
     {
         var formatter = new ChatMessageFormatter();
-        formatter.SetPrefix("{whitespace}{green}MAP{white}{whitespace}");
         var bridge = new InterfaceBridge(sharedSystem, dllPath, sharpPath, version, configuration, hotReload, formatter,
             this);
         var services = new ServiceCollection();
@@ -134,12 +133,15 @@ internal class MapManager : IModSharpModule, IMapManager, IGameListener
     public void PostInit()
     {
         // Safest place to init convars is PostInit 
-        _chatFormatPrefix = _bridge.ConVarManager.CreateConVar("mapmanager_format_prefix", "{green}[MAP]{white}",
+        _chatFormatPrefix = _bridge.ConVarManager.CreateConVar("mapmanager_format_prefix", "{whitespace}{green}[RED]{whitespace}{{white}",
             "Chat prefix format for map manager module.");
         
         // Real time prefix changes
         if (_chatFormatPrefix is not null)
+        {
+            _bridge.ChatFormatter.SetPrefix(_chatFormatPrefix.GetString());
             _bridge.ConVarManager.InstallChangeHook(_chatFormatPrefix, OnChatFormatPrefixChange);
+        }
 
         _countdownAfterChangeLevel = _bridge.ConVarManager.CreateConVar("mapmanager_countdown_after_changelevel", 180,
             "Countdown after map change (unit is sec.)");
