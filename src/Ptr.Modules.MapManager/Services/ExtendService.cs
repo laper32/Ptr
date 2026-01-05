@@ -38,6 +38,14 @@ internal class ExtendService : IExtendService, IClientListener, IGameListener
 
     private void OnCommandExt(IGameClient client, StringCommand command)
     {
+        if (_enableExtend?.GetBool() is not true)
+        {
+            return;
+        }
+        if (_localizerManager is null)
+        {
+            throw new InvalidOperationException("LocalizerManager is not initialized.");
+        }
         _localizerManager.TryGetLocalizer(client, out var _localizer);
         if (_localizer is null)
         {
@@ -127,11 +135,6 @@ internal class ExtendService : IExtendService, IClientListener, IGameListener
 
     public void OnAllModulesLoaded()
     {
-        if (_enableExtend?.GetBool() is not true)
-        {
-            return;
-        }
-
         _commandRegistry = _bridge.SharpModuleManager
             .GetRequiredSharpModuleInterface<ICommandManager>(ICommandManager.Identity).Instance!
             .GetRegistry(_bridge.ModuleIdentity);
@@ -144,11 +147,6 @@ internal class ExtendService : IExtendService, IClientListener, IGameListener
 
     public void OnShutdown()
     {
-        if (_enableExtend?.GetBool() is not true)
-        {
-            return;
-        }
-
         ResetExtCount();
         ResetClientsExt();
     }

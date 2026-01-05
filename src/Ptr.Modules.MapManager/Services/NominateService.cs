@@ -32,21 +32,11 @@ internal class NominateService : INominateService
 
     public void OnInit()
     {
-        if (_enableNominate?.GetBool() is true)
-        {
-            return;
-        }
-
-        _logger.LogInformation("Nomination is disabled.");
+        _logger.LogInformation("Nomination is enabled.");
     }
 
     public void OnAllModulesLoaded()
     {
-        if (_enableNominate?.GetBool() is not true)
-        {
-            return;
-        }
-
         _bridge
             .SharpModuleManager
             .GetRequiredSharpModuleInterface<ICommandManager>(ICommandManager.Identity)
@@ -54,22 +44,23 @@ internal class NominateService : INominateService
             .GetRegistry(_bridge.ModuleIdentity)
             .RegisterClientCommand("nominate", OnCommandNominate);
 
-        _localizerManager = _bridge.SharpModuleManager
-            .GetRequiredSharpModuleInterface<ILocalizerManager>(ILocalizerManager.Identity).Instance!;
     }
 
     public void OnShutdown()
     {
-        if (_enableNominate?.GetBool() is not true)
-        {
-            return;
-        }
-
         _bridge.NominatedMaps.Clear();
     }
 
     private void OnCommandNominate(IGameClient client, StringCommand command)
     {
+        if (_enableNominate?.GetBool() is not true)
+        {
+            return;
+        }
+        if (_localizerManager is null)
+        {
+            throw new InvalidOperationException("LocalizerManager is not initialized.");
+        }
         _localizerManager.TryGetLocalizer(client, out var _localizer);
         if (_localizer is null)
         {
