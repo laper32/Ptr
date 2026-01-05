@@ -126,6 +126,7 @@ internal class MapManager : IModSharpModule, IMapManager, IGameListener
     public bool Init()
     {
         InitConfig();
+        _provider.CallInit<IModule>(e => { _logger.LogError(e, "An error occurred when initializing modules"); });
 
         return true;
     }

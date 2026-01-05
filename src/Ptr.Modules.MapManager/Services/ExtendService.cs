@@ -16,9 +16,9 @@ internal interface IExtendService : IModule;
 internal class ExtendService : IExtendService, IClientListener, IGameListener
 {
     private readonly InterfaceBridge _bridge;
-    private readonly IConVar? _enableExtend;
-    private readonly IConVar? _extendTime;
-    private readonly IConVar? _maxExtCount;
+    private IConVar? _enableExtend = null!;
+    private IConVar? _extendTime = null!;
+    private IConVar? _maxExtCount = null!;
     private readonly bool[] _extClients = new bool[64];
     private readonly ILogger<ExtendService> _logger;
     private int _extCount;
@@ -29,11 +29,7 @@ internal class ExtendService : IExtendService, IClientListener, IGameListener
     {
         _bridge = bridge;
         _logger = logger;
-        _enableExtend = _bridge.ConVarManager.CreateConVar("mapmanager_enable_extend", true, "Enable ext");
-        _maxExtCount = _bridge.ConVarManager.CreateConVar("mapmanager_max_extend_count", 3,
-            "Maximum allowed extend map time limit count.");
-        _extendTime =
-            _bridge.ConVarManager.CreateConVar("mapmanager_ext_time", 15, "The extend applies for time limit.");
+
     }
 
     private void OnCommandExt(IGameClient client, StringCommand command)
@@ -122,13 +118,18 @@ internal class ExtendService : IExtendService, IClientListener, IGameListener
     }
 
     #region IModule
-
+    public void OnPostInit()
+    {
+        _enableExtend = _bridge!.ConVarManager.CreateConVar("mapmanager_enable_extend", true, "Enable ext");
+        _maxExtCount = _bridge!.ConVarManager.CreateConVar("mapmanager_max_extend_count", 3,
+            "Maximum allowed extend map time limit count.");
+        _extendTime =
+            _bridge!.ConVarManager.CreateConVar("mapmanager_ext_time", 15, "The extend applies for time limit.");
+    }
     public void OnInit()
     {
-        if (_enableExtend?.GetBool() is true)
-        {
-            return;
-        }
+        _bridge.ModSharp.InstallGameListener(this);
+        _bridge.ClientManager.InstallClientListener(this);
 
         _logger.LogInformation("Ext is disabled.");
     }

@@ -15,7 +15,7 @@ internal class RtvService : IRtvService, IGameListener, IClientListener
 {
     private readonly InterfaceBridge _bridge;
 
-    private readonly IConVar? _enableRtv;
+    private IConVar? _enableRtv = null!;
     private readonly ILogger<RtvService> _logger;
     private readonly bool[] _rtvPlayers = new bool[64];
     private ILocalizerManager _localizerManager = null!;
@@ -24,15 +24,13 @@ internal class RtvService : IRtvService, IGameListener, IClientListener
     {
         _bridge = bridge;
         _logger = logger;
-
-
-        _enableRtv = _bridge.ConVarManager.CreateConVar("mapmanager_enable_rtv", true, "Enable RTV");
     }
 
     private void AttemptRtv(IGameClient client)
     {
         if (_enableRtv?.GetBool() is not true)
         {
+            _logger.LogInformation("RTV is disabled, skip RTV attempt.");
             return;
         }
         if (_localizerManager is null)
@@ -111,17 +109,14 @@ internal class RtvService : IRtvService, IGameListener, IClientListener
     }
 
     #region IModule
-
     public void OnInit()
     {
-        if (_enableRtv?.GetBool() is not true)
-        {
-            _logger.LogInformation("RTV is disabled, skip initialization.");
-            return;
-        }
-
-        _bridge.ClientManager.InstallClientListener(this);
         _bridge.ModSharp.InstallGameListener(this);
+        _bridge.ClientManager.InstallClientListener(this);
+    }
+    public void OnPostInit()
+    {
+        _enableRtv = _bridge.ConVarManager.CreateConVar("mapmanager_enable_rtv", true, "Enable RTV");
     }
 
     public void OnAllModulesLoaded()
@@ -166,8 +161,10 @@ internal class RtvService : IRtvService, IGameListener, IClientListener
     public ECommandAction OnClientSayCommand(IGameClient client, bool teamOnly, bool isCommand, string commandName,
         string message)
     {
+        _logger.LogInformation("Client {ClientSlot} said: {Message}", client.Slot, message);
         if (message.Split().ElementAtOrDefault(0)?.Equals("rtv", StringComparison.OrdinalIgnoreCase) is true)
         {
+            _logger.LogInformation("Client {ClientSlot} is attempting to RTV.", client.Slot);
             AttemptRtv(client);
         }
 
