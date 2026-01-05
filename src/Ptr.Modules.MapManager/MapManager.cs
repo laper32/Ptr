@@ -133,7 +133,7 @@ internal class MapManager : IModSharpModule, IMapManager, IGameListener
     public void PostInit()
     {
         // Safest place to init convars is PostInit 
-        _chatFormatPrefix = _bridge.ConVarManager.CreateConVar("mapmanager_format_prefix", "{whitespace}{green}[RED]{whitespace}{{white}",
+        _chatFormatPrefix = _bridge.ConVarManager.CreateConVar("mapmanager_format_prefix", "{whitespace}{red}MapVote{whitespace}{muted}",
             "Chat prefix format for map manager module.");
         
         // Real time prefix changes
