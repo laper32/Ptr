@@ -51,7 +51,6 @@ internal class MapManager : IModSharpModule, IMapManager, IGameListener
         services.AddLogging(x => x.ClearProviders());
 
         var provider = services.BuildServiceProvider();
-        provider.UseHook<ApplyGameSettingsHook>();
         _bridge = provider.GetRequiredService<InterfaceBridge>();
         _logger = sharedSystem.GetLoggerFactory().CreateLogger<MapManager>();
 
@@ -128,10 +127,6 @@ internal class MapManager : IModSharpModule, IMapManager, IGameListener
     {
         InitConfig();
 
-        _provider.LoadAllSharpExtensions();
-        _provider.InitNativeHooks();
-        _provider.CallInit<IModule>(e => { _logger.LogError(e, "An error occurred when initializing modules"); });
-
         return true;
     }
 
@@ -168,11 +163,17 @@ internal class MapManager : IModSharpModule, IMapManager, IGameListener
 
     public void OnAllModulesLoaded()
     {
+        _provider.LoadAllSharpExtensions();
+        _provider.InitNativeHooks();
+        _provider.CallInit<IModule>(e => { _logger.LogError(e, "An error occurred when initializing modules"); });
+        _provider.UseHook<ApplyGameSettingsHook>();
+
         CallMapConfigLoaded();
 
         var _localizerManager = _bridge.SharpModuleManager
             .GetRequiredSharpModuleInterface<ILocalizerManager>(ILocalizerManager.Identity).Instance!;
         _localizerManager.LoadLocaleFile("Ptr.Modules.MapManager");
+        
     }
 
     public void Shutdown()

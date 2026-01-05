@@ -9,6 +9,8 @@
         <IsSharedProject>$([System.String]::new('$(MSBuildProjectName)').EndsWith('.Shared'))</IsSharedProject>
         <IsSharedProject Condition="'$(MSBuildProjectName)' == 'Ptr.Shared'">true</IsSharedProject>
         <IsModuleProject>$([System.String]::new('$(MSBuildProjectName)').Contains('.Modules.'))</IsModuleProject>
+        <!-- Ptr core module also goes to modules folder -->
+        <IsModuleProject Condition="'$(MSBuildProjectName)' == 'Ptr'">true</IsModuleProject>
     </PropertyGroup>
 
     <!-- Output to .asset\game\sharp\shared\ for Shared projects -->
