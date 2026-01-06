@@ -15,10 +15,8 @@ internal interface INominateService : IModule;
 internal class NominateService : INominateService
 {
     private readonly InterfaceBridge _bridge;
-
-    private IConVar? _enableNominate;
-    private IConVar? _activateNominateMinPlayers;
-
+    private readonly IConVar _enableNominate;
+    private readonly IConVar _activateNominateMinPlayers;
     private readonly ILogger<NominateService> _logger;
     private ILocalizerManager _localizerManager = null!;
 
@@ -26,18 +24,14 @@ internal class NominateService : INominateService
     {
         _bridge = bridge;
         _logger = logger;
+        _enableNominate = _bridge.ConVarManager.CreateConVar("mapmanager_enable_nominate", true, "Enable nominate command", ConVarFlags.Release)!;
+        _activateNominateMinPlayers = _bridge.ConVarManager.CreateConVar("mapmanager_activate_nominate_min_players", 5,
+            "minimal players count to activate nominate.", ConVarFlags.Release)!;
     }
 
     public void OnInit()
     {
         _logger.LogInformation("Nomination is enabled.");
-    }
-
-    public void OnPostInit()
-    {
-        _enableNominate = _bridge.ConVarManager.CreateConVar("mapmanager_enable_nominate", true, "Enable nominate", ConVarFlags.Release);
-        _activateNominateMinPlayers = _bridge.ConVarManager.CreateConVar("mapmanager_activate_nominate_min_players", 5,
-            "minimal players count to activate nominate.", ConVarFlags.Release);
     }
 
     public void OnAllModulesLoaded()
@@ -61,12 +55,7 @@ internal class NominateService : INominateService
 
     private void OnCommandNominate(IGameClient client, StringCommand command)
     {
-        if (_enableNominate is null)
-        {
-            _logger.LogWarning("Enabled Nominate ConVar is not initialized.");
-            return;
-        }
-        if (_enableNominate?.GetBool() is not true)
+        if (_enableNominate.GetBool() is not true)
         {
             return;
         }
@@ -83,7 +72,7 @@ internal class NominateService : INominateService
         }
 
         var clientsCount = _bridge.Server.GetGameClients(true, true).Count;
-        var leastActivateNominateCount = _activateNominateMinPlayers?.GetInt32() ?? 5;
+        var leastActivateNominateCount = _activateNominateMinPlayers.GetInt32();
 
         if (clientsCount < leastActivateNominateCount)
         {

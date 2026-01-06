@@ -14,8 +14,7 @@ internal interface IRtvService : IModule;
 internal class RtvService : IRtvService, IGameListener, IClientListener
 {
     private readonly InterfaceBridge _bridge;
-
-    private IConVar? _enableRtv = null!;
+    private readonly IConVar _enableRtv;
     private readonly ILogger<RtvService> _logger;
     private readonly bool[] _rtvPlayers = new bool[64];
     private ILocalizerManager _localizerManager = null!;
@@ -24,16 +23,12 @@ internal class RtvService : IRtvService, IGameListener, IClientListener
     {
         _bridge = bridge;
         _logger = logger;
+        _enableRtv = _bridge.ConVarManager.CreateConVar("mapmanager_enable_rtv", true, "Enable RTV", ConVarFlags.Release)!;
     }
 
     private void AttemptRtv(IGameClient client)
     {
-        if (_enableRtv is null)
-        {
-            _logger.LogWarning("RTV ConVar is not initialized.");
-            return;
-        }
-        if (_enableRtv?.GetBool() is not true)
+        if (_enableRtv.GetBool() is not true)
         {
             _logger.LogInformation("RTV is disabled, skip RTV attempt.");
             return;
@@ -119,11 +114,6 @@ internal class RtvService : IRtvService, IGameListener, IClientListener
         _bridge.ModSharp.InstallGameListener(this);
         _bridge.ClientManager.InstallClientListener(this);
     }
-    public void OnPostInit()
-    {
-        _enableRtv = _bridge.ConVarManager.CreateConVar("mapmanager_enable_rtv", true, "Enable RTV", ConVarFlags.Release);
-    }
-
     public void OnAllModulesLoaded()
     {
         _localizerManager = _bridge.SharpModuleManager

@@ -16,9 +16,9 @@ internal interface IExtendService : IModule;
 internal class ExtendService : IExtendService, IClientListener, IGameListener
 {
     private readonly InterfaceBridge _bridge;
-    private IConVar? _enableExtend = null!;
-    private IConVar? _extendTime = null!;
-    private IConVar? _maxExtCount = null!;
+    private readonly IConVar _enableExtend;
+    private readonly IConVar _extendTime;
+    private readonly IConVar _maxExtCount;
     private readonly bool[] _extClients = new bool[64];
     private readonly ILogger<ExtendService> _logger;
     private int _extCount;
@@ -29,12 +29,15 @@ internal class ExtendService : IExtendService, IClientListener, IGameListener
     {
         _bridge = bridge;
         _logger = logger;
-
+        _enableExtend = _bridge.ConVarManager.CreateConVar("mapmanager_enable_extend", true, "Enable map extensions command", ConVarFlags.Release)!;
+        _maxExtCount = _bridge.ConVarManager.CreateConVar("mapmanager_max_extend_count", 3,
+            "Maximum allowed extend map time limit count.", ConVarFlags.Release)!;
+        _extendTime = _bridge.ConVarManager.CreateConVar("mapmanager_ext_time", 15, "The extend applies for time limit.", ConVarFlags.Release)!;
     }
 
     private void OnCommandExt(IGameClient client, StringCommand command)
     {
-        if (_enableExtend?.GetBool() is not true)
+        if (_enableExtend.GetBool() is not true)
         {
             return;
         }
@@ -57,7 +60,7 @@ internal class ExtendService : IExtendService, IClientListener, IGameListener
             return;
         }
 
-        var maxAllowed = _maxExtCount!.GetInt32();
+        var maxAllowed = _maxExtCount.GetInt32();
         if (_extCount >= maxAllowed)
         {
             client.PrintToChat(_bridge.ChatFormatter.Format(_localizer.Format("ptr.mapmanager.max_extends_reached")));
@@ -95,7 +98,7 @@ internal class ExtendService : IExtendService, IClientListener, IGameListener
         }
         var timeLimit = _bridge.ConVarManager.FindConVar("mp_timelimit")!;
         var currentTimeLeft = timeLimit.GetFloat();
-        var pendingExtendTime = _extendTime?.GetFloat() ?? 15.0f;
+        var pendingExtendTime = _extendTime.GetFloat();
         var nextTimeLeft = currentTimeLeft + pendingExtendTime;
         timeLimit.Set($"{nextTimeLeft}");
         _extCount++;
@@ -118,14 +121,6 @@ internal class ExtendService : IExtendService, IClientListener, IGameListener
     }
 
     #region IModule
-    public void OnPostInit()
-    {
-        _enableExtend = _bridge!.ConVarManager.CreateConVar("mapmanager_enable_extend", true, "Enable ext", ConVarFlags.Release);
-        _maxExtCount = _bridge!.ConVarManager.CreateConVar("mapmanager_max_extend_count", 3,
-            "Maximum allowed extend map time limit count.", ConVarFlags.Release);
-        _extendTime =
-            _bridge!.ConVarManager.CreateConVar("mapmanager_ext_time", 15, "The extend applies for time limit.", ConVarFlags.Release);
-    }
     public void OnInit()
     {
         _bridge.ModSharp.InstallGameListener(this);
