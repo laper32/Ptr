@@ -24,7 +24,7 @@ namespace Sharp.Modules.AdminManager.Shared;
 public interface IAdmin
 {
     /// <summary>
-    ///     Admin name
+    ///     管理员名字
     /// </summary>
     string Name { get; }
 
@@ -34,33 +34,33 @@ public interface IAdmin
     SteamID Identity { get; }
 
     /// <summary>
-    ///     Immunity level
+    ///     权限级别
     /// </summary>
     byte Immunity { get; }
 
     /// <summary>
-    ///     Permissions
+    ///     权限
     /// </summary>
     IReadOnlySet<string> Permissions { get; }
 
     /// <summary>
-    ///     Check if has permission
+    ///     是否拥有权限
     /// </summary>
-    /// <param name="permission">Permission field</param>
+    /// <param name="permission">权限字段</param>
     /// <returns></returns>
     bool HasPermission(string permission);
 
     /// <summary>
-    ///     Add permission
+    ///     添加权限
     /// </summary>
-    /// <param name="permission">Permission field</param>
+    /// <param name="permission">权限字段</param>
     /// <returns></returns>
     bool AddPermission(string permission);
 
     /// <summary>
-    ///     Remove permission
+    ///     删除权限
     /// </summary>
-    /// <param name="permission">Permission field</param>
+    /// <param name="permission">权限字段</param>
     /// <returns></returns>
     bool RemovePermission(string permission);
 }
