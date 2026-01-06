@@ -168,9 +168,9 @@ internal class MapManager : IModSharpModule, IMapManager, IGameListener
     public void OnAllModulesLoaded()
     {
         _provider.LoadAllSharpExtensions();
+        _provider.UseHook<ApplyGameSettingsHook>();
         _provider.InitNativeHooks();
         _provider.CallAllModulesLoaded<IModule>(e => { _logger.LogError(e, "An error occurred when initializing modules"); });
-        _provider.UseHook<ApplyGameSettingsHook>();
 
         CallMapConfigLoaded();
 
