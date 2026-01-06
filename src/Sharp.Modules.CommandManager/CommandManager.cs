@@ -91,7 +91,7 @@ internal class CommandManager : IModSharpModule, ICommandManager
     }
 
     /// <summary>
-    /// Get the command decorated with ms_ prefix, this is generally only needed for server console commands
+    /// 获取经过ms_装饰后的指令，这个一般只有服务端控制台指令需要
     /// </summary>
     /// <param name="originalCommand"></param>
     /// <param name="addPrefix"></param>
@@ -112,7 +112,7 @@ internal class CommandManager : IModSharpModule, ICommandManager
     }
 
     /// <summary>
-    /// Check if the command has ms_ prefix
+    /// 判断是否有ms_前缀
     /// </summary>
     /// <param name="command"></param>
     /// <returns></returns>
@@ -122,7 +122,7 @@ internal class CommandManager : IModSharpModule, ICommandManager
     }
 
     /// <summary>
-    /// Get the command with ms_ prefix removed, this is generally only needed for in-game commands
+    /// 获取移除ms_装饰后的指令，这个一般只有游戏内指令需要
     /// </summary>
     /// <param name="command"></param>
     /// <returns></returns>

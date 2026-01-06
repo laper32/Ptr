@@ -12,8 +12,8 @@ namespace Sharp.Modules.AdminManager;
 
 // https://www.doubao.com/thread/wc0f1c5cae120c2bb
 
-// The core purpose is to centralize the admin registration mechanism, making all admin registration logic go through the same path.
-// Therefore, complexity is unavoidable: because this involves secondary keys.
+// 核心目的是集中管理员注册机制，让所有管理员的注册逻辑都走同一个。
+// 由此，复杂是不可避免的：因为这里涉及到二级key。
 
 using PermissionCollectionDictionary = Dictionary<
     string, // Collection key
@@ -42,7 +42,7 @@ internal class AdminManager : IAdminManager, IModSharpModule
         string, // module identity
         RolesDictionary> _roles = new(StringComparer.OrdinalIgnoreCase);
 
-    // This ignores all plugins, it's unified, it's only used for convenient internal calls, unrelated to external usage.
+    // 这个无视所有插件的，这个是统一的，这个只是用来方便内部调用的，跟外部无关。
     private readonly HashSet<string> _allConcretePermissions = new(StringComparer.OrdinalIgnoreCase);
 
     // Centralized admin storage - all admins from all modules
