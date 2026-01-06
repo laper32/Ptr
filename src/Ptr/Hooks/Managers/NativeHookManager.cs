@@ -36,6 +36,11 @@ internal class NativeHookManager : IInternalNativeHookManager
     {
         foreach (var hook in _hooks.Where(x => x.Module.Equals(_self)).Select(x => x.Hook))
         {
+            hook.Init();
+        }
+
+        foreach (var hook in _hooks.Where(x => x.Module.Equals(_self)).Select(x => x.Hook))
+        {
             hook.Load();
         }
     }
