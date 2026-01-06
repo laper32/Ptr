@@ -77,7 +77,7 @@ internal class InterfaceBridge
     public string ModuleIdentity { get; init; }
 
     /// <summary>
-    ///     Don't use it to make holes under normal circumstances!
+    ///     Don't use it under normal circumstances!
     /// </summary>
     internal static InterfaceBridge Instance { get; private set; } = null!;
 
@@ -139,7 +139,7 @@ internal class InterfaceBridge
     public DateTime AllowVoteTime { get; set; }
 
     /// <summary>
-    ///     Don't use it to make holes under normal circumstances!
+    ///     Don't use it under normal circumstances!
     /// </summary>
     public string CurrentMapGroup { get; set; } = string.Empty;
 
