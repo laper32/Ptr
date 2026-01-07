@@ -4,25 +4,6 @@
         <VersionPrefix>1.0</VersionPrefix>
         <VersionSuffix>0</VersionSuffix>
         <Version>$(VersionPrefix).$(VersionSuffix)</Version>
-
-        <!-- Determine output category based on project name -->
-        <IsSharedProject>$([System.String]::new('$(MSBuildProjectName)').EndsWith('.Shared'))</IsSharedProject>
-        <IsSharedProject Condition="'$(MSBuildProjectName)' == 'Ptr.Shared'">true</IsSharedProject>
-        <IsModuleProject>$([System.String]::new('$(MSBuildProjectName)').Contains('.Modules.'))</IsModuleProject>
-        <!-- Ptr core module also goes to modules folder -->
-        <IsModuleProject Condition="'$(MSBuildProjectName)' == 'Ptr'">true</IsModuleProject>
-    </PropertyGroup>
-
-    <!-- Output to .asset\game\sharp\shared\ for Shared projects -->
-    <PropertyGroup Condition="'$(IsSharedProject)' == 'true'">
-        <OutputPath>$(MSBuildThisFileDirectory)..\.asset\game\sharp\shared\$(MSBuildProjectName)\</OutputPath>
-        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    </PropertyGroup>
-
-    <!-- Output to .asset\game\sharp\modules\ for Module projects (not ending with .Shared) -->
-    <PropertyGroup Condition="'$(IsModuleProject)' == 'true' And '$(IsSharedProject)' != 'true'">
-        <OutputPath>$(MSBuildThisFileDirectory)..\.asset\game\sharp\modules\$(MSBuildProjectName)\</OutputPath>
-        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     </PropertyGroup>
 
 	<ItemGroup>
