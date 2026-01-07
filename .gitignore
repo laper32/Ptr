@@ -417,5 +417,3 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
-/.asset/game/sharp/modules
-/.asset/game/sharp/shared
