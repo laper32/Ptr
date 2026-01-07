@@ -85,6 +85,10 @@ internal class RtvService : IRtvService, IGameListener, IClientListener
 
         foreach (var c in allClients)
         {
+            if (c.IsFakeClient)
+            {
+                continue;
+            }
             _localizerManager.TryGetLocalizer(c, out var _tempLocalizer);
             if (_tempLocalizer is null)
             {
