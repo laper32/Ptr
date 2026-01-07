@@ -15,12 +15,12 @@ namespace Ptr.Shared.Hooks.Abstractions;
 internal interface IHookService<in TParams, THookReturn> where TParams : class, IFunctionParams
 {
     /// <summary>
-    ///     泛播给其他的订户
+    ///     Broadcast to other subscribers
     /// </summary>
-    /// <typeparam name="TParams">Hook参数</typeparam>
-    /// <typeparam name="THookReturn">Hook的返回值 (如果是void, 直接写int就好)</typeparam>
+    /// <typeparam name="TParams">Hook parameters</typeparam>
+    /// <typeparam name="THookReturn">Hook return value (if void, just use int)</typeparam>
     /// <param name="params"></param>
-    /// <returns>封装了Hook操作和Hook的返回值</returns>
+    /// <returns>Encapsulates the hook action and hook return value</returns>
     HookReturnValue<THookReturn> InvokeHookPre(TParams @params);
 
     void InvokeHookPost(TParams @params, HookReturnValue<THookReturn> @return);

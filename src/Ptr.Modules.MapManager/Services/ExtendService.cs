@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Ptr.Shared.Extensions;
 using Ptr.Shared.Hosting;
 using Sharp.Modules.CommandManager.Shared;
+using Sharp.Modules.LocalizerManager.Shared;
 using Sharp.Shared.Definition;
 using Sharp.Shared.Enums;
 using Sharp.Shared.Listeners;
@@ -15,46 +16,60 @@ internal interface IExtendService : IModule;
 internal class ExtendService : IExtendService, IClientListener, IGameListener
 {
     private readonly InterfaceBridge _bridge;
-    private readonly IConVar? _enableExtend;
-
+    private readonly IConVar _enableExtend;
+    private readonly IConVar _extendTime;
+    private readonly IConVar _maxExtCount;
     private readonly bool[] _extClients = new bool[64];
-    private readonly IConVar? _extendTime;
     private readonly ILogger<ExtendService> _logger;
-    private readonly IConVar? _maxExtCount;
     private int _extCount;
     private ICommandRegistry _commandRegistry = null!;
+    private ILocalizerManager _localizerManager = null!;
 
     public ExtendService(InterfaceBridge bridge, ILogger<ExtendService> logger)
     {
         _bridge = bridge;
         _logger = logger;
-        _enableExtend = _bridge.ConVarManager.CreateConVar("mapmanager_enable_extend", true, "Enable ext");
+        _enableExtend = _bridge.ConVarManager.CreateConVar("mapmanager_enable_extend", true, "Enable map extensions command", ConVarFlags.Release)!;
         _maxExtCount = _bridge.ConVarManager.CreateConVar("mapmanager_max_extend_count", 3,
-            "Maximum allowed extend map time limit count.");
-        _extendTime =
-            _bridge.ConVarManager.CreateConVar("mapmanager_ext_time", 15, "The extend applies for time limit.");
+            "Maximum allowed extend map time limit count.", ConVarFlags.Release)!;
+        _extendTime = _bridge.ConVarManager.CreateConVar("mapmanager_ext_time", 15, "The extend applies for time limit.", ConVarFlags.Release)!;
     }
 
     private void OnCommandExt(IGameClient client, StringCommand command)
     {
+        if (_enableExtend.GetBool() is not true)
+        {
+            return;
+        }
+        if (_localizerManager is null)
+        {
+            throw new InvalidOperationException("LocalizerManager is not initialized.");
+        }
+        _localizerManager.TryGetLocalizer(client, out var _localizer);
+        if (_localizer is null)
+        {
+            _logger.LogWarning("Localizer not found for client {ClientSlot} when executing ext command.",
+                client.Slot);
+            return;
+        }
         var remaining = (int)(_bridge.AllowVoteTime - DateTime.Now).TotalSeconds;
         if (remaining > 0)
         {
             client.PrintToChat(
-                _bridge.ChatFormatter.Format($"{ChatColor.Green}{remaining}{ChatColor.White} 秒后才能发起延长地图时间投票。"));
+                _bridge.ChatFormatter.Format(_localizer.Format("ptr.mapmanager.extend_map_after_x", remaining)));
             return;
         }
 
-        var maxAllowed = _maxExtCount!.GetInt32();
+        var maxAllowed = _maxExtCount.GetInt32();
         if (_extCount >= maxAllowed)
         {
-            client.PrintToChat(_bridge.ChatFormatter.Format("已到达最大可延长时间次数。"));
+            client.PrintToChat(_bridge.ChatFormatter.Format(_localizer.Format("ptr.mapmanager.max_extends_reached")));
             return;
         }
 
         if (_extClients[client.Slot])
         {
-            client.PrintToChat("你已经投票过延长地图时间了。");
+            client.PrintToChat(_bridge.ChatFormatter.Format(_localizer.Format("ptr.mapmanager.you_already_voted_to_extend")));
             return;
         }
 
@@ -63,16 +78,31 @@ internal class ExtendService : IExtendService, IClientListener, IGameListener
         var request = _bridge.MapManager.GetVoteSuccessNumberRequested();
         var clientGaps = request - current;
         client.PrintToChat(
-            $"已有 {ChatColor.Green}{current}{ChatColor.White} 人投票延长地图时间，还需 {ChatColor.Green}{clientGaps}{ChatColor.White} 票。");
+            _bridge.ChatFormatter.Format(_localizer.Format("ptr.mapmanager.extend_vote_progress", current, clientGaps)));
         if (clientGaps > 0)
         {
             return;
         }
-
-        _bridge.ModSharp.PrintToChatAll("投票通过，即将延长地图持续时间。");
+        var allClients = _bridge.ClientManager.GetGameClients(true);
+        foreach (var c in allClients)
+        {
+            if (c.IsFakeClient)
+            {
+                continue;
+            }
+            _localizerManager.TryGetLocalizer(client, out var _tempLocalizer);
+            if (_tempLocalizer is null)
+            {
+                _logger.LogWarning("Localizer not found for client {ClientSlot} when executing ext command.",
+                    c.Slot);
+                continue;
+            }
+            c.PrintToChat(
+                _bridge.ChatFormatter.Format(_tempLocalizer.Format("ptr.mapmanager.extend_vote_passed")));
+        }
         var timeLimit = _bridge.ConVarManager.FindConVar("mp_timelimit")!;
         var currentTimeLeft = timeLimit.GetFloat();
-        var pendingExtendTime = _extendTime?.GetFloat() ?? 15.0f;
+        var pendingExtendTime = _extendTime.GetFloat();
         var nextTimeLeft = currentTimeLeft + pendingExtendTime;
         timeLimit.Set($"{nextTimeLeft}");
         _extCount++;
@@ -95,38 +125,29 @@ internal class ExtendService : IExtendService, IClientListener, IGameListener
     }
 
     #region IModule
-
     public void OnInit()
     {
-        if (_enableExtend?.GetBool() is true)
-        {
-            return;
-        }
+        _bridge.ModSharp.InstallGameListener(this);
+        _bridge.ClientManager.InstallClientListener(this);
 
         _logger.LogInformation("Ext is disabled.");
     }
 
     public void OnAllModulesLoaded()
     {
-        if (_enableExtend?.GetBool() is not true)
-        {
-            return;
-        }
-
         _commandRegistry = _bridge.SharpModuleManager
             .GetRequiredSharpModuleInterface<ICommandManager>(ICommandManager.Identity).Instance!
             .GetRegistry(_bridge.ModuleIdentity);
 
         _commandRegistry.RegisterClientCommand("ext", OnCommandExt);
+
+        _localizerManager = _bridge.SharpModuleManager
+            .GetRequiredSharpModuleInterface<ILocalizerManager>(ILocalizerManager.Identity)
+            .Instance!;
     }
 
     public void OnShutdown()
     {
-        if (_enableExtend?.GetBool() is not true)
-        {
-            return;
-        }
-
         ResetExtCount();
         ResetClientsExt();
     }

@@ -77,7 +77,7 @@ internal class InterfaceBridge
     public string ModuleIdentity { get; init; }
 
     /// <summary>
-    ///     开洞，一般情况下别用！
+    ///     Don't use it under normal circumstances!
     /// </summary>
     internal static InterfaceBridge Instance { get; private set; } = null!;
 
@@ -99,14 +99,16 @@ internal class InterfaceBridge
     public IModSharp ModSharp => _sharedSystem.GetModSharp();
 
     /// <summary>
-    ///     CGlobalVars* gpGlobals，没什么好说的。<br />
-    ///     注意，一定要在地图加载之后调用！不然服务器第一次加载的时候是拿不到的！
+    ///     CGlobalVars* gpGlobals，There's not much to say。<br />
+    ///     Note that this must be called after the map is loaded! <br />
+    ///  Otherwise, it won't be available when the server loads it for the first time!
     /// </summary>
     public IGlobalVars GlobalVars => ModSharp.GetGlobals();
 
     /// <summary>
-    ///     CGameRules* g_pGameRules <br />
-    ///     注意，一定要在地图加载之后调用！不然服务器第一次加载的时候是拿不到的！
+    ///   CGameRules* g_pGameRules <br />
+    ///   Note that this must be called after the map is loaded! <br />
+    ///   Otherwise, it won't be available when the server loads it for the first time!
     /// </summary>
     public IGameRules GameRules => ModSharp.GetGameRules();
 
@@ -137,7 +139,7 @@ internal class InterfaceBridge
     public DateTime AllowVoteTime { get; set; }
 
     /// <summary>
-    ///     开洞，一般情况下别用！
+    ///     Don't use it under normal circumstances!
     /// </summary>
     public string CurrentMapGroup { get; set; } = string.Empty;
 

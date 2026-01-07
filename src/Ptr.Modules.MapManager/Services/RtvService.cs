@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Ptr.Shared.Extensions;
 using Ptr.Shared.Hosting;
+using Sharp.Modules.LocalizerManager.Shared;
 using Sharp.Shared.Definition;
 using Sharp.Shared.Enums;
 using Sharp.Shared.Listeners;
@@ -13,33 +14,48 @@ internal interface IRtvService : IModule;
 internal class RtvService : IRtvService, IGameListener, IClientListener
 {
     private readonly InterfaceBridge _bridge;
-
-    private readonly IConVar? _enableRtv;
+    private readonly IConVar _enableRtv;
     private readonly ILogger<RtvService> _logger;
     private readonly bool[] _rtvPlayers = new bool[64];
+    private ILocalizerManager _localizerManager = null!;
 
     public RtvService(InterfaceBridge bridge, ILogger<RtvService> logger)
     {
         _bridge = bridge;
         _logger = logger;
-
-
-        _enableRtv = _bridge.ConVarManager.CreateConVar("mapmanager_enable_rtv", true, "Enable RTV");
+        _enableRtv = _bridge.ConVarManager.CreateConVar("mapmanager_enable_rtv", true, "Enable RTV", ConVarFlags.Release)!;
     }
 
     private void AttemptRtv(IGameClient client)
     {
+        if (_enableRtv.GetBool() is not true)
+        {
+            _logger.LogInformation("RTV is disabled, skip RTV attempt.");
+            return;
+        }
+        if (_localizerManager is null)
+        {
+            throw new InvalidOperationException("LocalizerManager is not initialized.");
+        }
+        _localizerManager.TryGetLocalizer(client, out var _localizer);
+        if (_localizer is null)
+        {
+            _logger.LogWarning("Localizer not found for client {ClientSlot} when executing rtv command.",
+                client.Slot);
+            return;
+        }
+
         var remaining = (int)(_bridge.AllowVoteTime - DateTime.Now).TotalSeconds;
         if (remaining > 0)
         {
             client.PrintToChat(
-                _bridge.ChatFormatter.Format($"{ChatColor.Green} {remaining} {ChatColor.White}秒后才能发起换图投票。"));
+                _bridge.ChatFormatter.Format(_localizer.Format("ptr.mapmanager.rtv_after_x", remaining)));
             return;
         }
 
         if (_rtvPlayers[client.Slot])
         {
-            client.PrintToChat(_bridge.ChatFormatter.Format("你已经投票过换图了！"));
+            client.PrintToChat(_bridge.ChatFormatter.Format(_localizer.Format("ptr.mapmanager.already_voted_rtv")));
             return;
         }
 
@@ -47,15 +63,42 @@ internal class RtvService : IRtvService, IGameListener, IClientListener
         var current = _rtvPlayers.Count(rtvPlayer => rtvPlayer);
         var requested = _bridge.MapManager.GetVoteSuccessNumberRequested();
         var clientGaps = requested - current;
-        _bridge.ModSharp.PrintToChatAll(_bridge.ChatFormatter.Format(
-            $"已有 {ChatColor.Green}{current}{ChatColor.White} 人投票换图，还需 {ChatColor.Green}{clientGaps}{ChatColor.White} 票。"));
+
+        var allClients = _bridge.ClientManager.GetGameClients(true);
+        foreach (var c in allClients)
+        {
+            _localizerManager.TryGetLocalizer(c, out var _tempLocalizer);
+            if (_tempLocalizer is null)
+            {
+                _logger.LogWarning("Localizer not found for client {ClientSlot} when broadcasting rtv progress.",
+                    c.Slot);
+                continue;
+            }
+            c.PrintToChat(
+                _bridge.ChatFormatter.Format(_tempLocalizer.Format("ptr.mapmanager.rtv_vote_progress", current, clientGaps)));
+        }
 
         if (clientGaps > 0)
         {
             return;
         }
 
-        _bridge.ModSharp.PrintToChatAll(_bridge.ChatFormatter.Format("投票换图通过！将在回合结束后开始投票。"));
+        foreach (var c in allClients)
+        {
+            if (c.IsFakeClient)
+            {
+                continue;
+            }
+            _localizerManager.TryGetLocalizer(c, out var _tempLocalizer);
+            if (_tempLocalizer is null)
+            {
+                _logger.LogWarning("Localizer not found for client {ClientSlot} when broadcasting rtv passed.",
+                    c.Slot);
+                continue;
+            }
+            c.PrintToChat(
+                _bridge.ChatFormatter.Format(_tempLocalizer.Format("ptr.mapmanager.rtv_vote_passed")));
+        }
         _bridge.ModSharp.ServerCommand("mp_timelimit 0.00000001");
     }
 
@@ -70,27 +113,20 @@ internal class RtvService : IRtvService, IGameListener, IClientListener
     }
 
     #region IModule
-
     public void OnInit()
     {
-        if (_enableRtv?.GetBool() is not true)
-        {
-            _logger.LogInformation("RTV is disabled, skip initialization.");
-            return;
-        }
-
-        _bridge.ClientManager.InstallClientListener(this);
         _bridge.ModSharp.InstallGameListener(this);
+        _bridge.ClientManager.InstallClientListener(this);
+    }
+    public void OnAllModulesLoaded()
+    {
+        _localizerManager = _bridge.SharpModuleManager
+            .GetRequiredSharpModuleInterface<ILocalizerManager>(ILocalizerManager.Identity)
+            .Instance!;
     }
 
     public void OnShutdown()
     {
-        if (_enableRtv?.GetBool() is not true)
-        {
-            _logger.LogInformation("RTV is disabled, skip shutdown.");
-            return;
-        }
-
         _bridge.ModSharp.RemoveGameListener(this);
         _bridge.ClientManager.RemoveClientListener(this);
         ResetRtvState();

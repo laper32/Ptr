@@ -11,7 +11,7 @@ public static class EntityManagerExtensions
     extension(IEntityManager self)
     {
         /// <summary>
-        ///     通过PlayerSlot查找PlayerController
+        ///     Find PlayerController by PlayerSlot
         /// </summary>
         public IPlayerController? GetPlayerController(PlayerSlot slot)
         {
@@ -19,7 +19,7 @@ public static class EntityManagerExtensions
         }
 
         /// <summary>
-        ///     通过IGameClient查找PlayerController
+        ///     Find PlayerController by IGameClient
         /// </summary>
         public IPlayerController? GetPlayerController(IGameClient client)
         {
