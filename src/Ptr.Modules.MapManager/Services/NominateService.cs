@@ -117,6 +117,10 @@ internal class NominateService : INominateService
         var allClients = _bridge.ClientManager.GetGameClients(true);
         foreach (var c in allClients)
         {
+            if (c.IsFakeClient)
+            {
+                continue;
+            }
             _localizerManager.TryGetLocalizer(c, out var _tempLocalizer);
             if (_tempLocalizer is null)
             {
