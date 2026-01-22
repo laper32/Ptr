@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Ptr.Hooks;
 using Ptr.Shared.Bridge;
+using Ptr.Shared.Hooks.Managers;
 using Ptr.Shared.Hosting;
 using Sharp.Shared;
 using Sharp.Shared.Abstractions;
@@ -70,7 +71,6 @@ internal class Ptr : IModSharpModule
     {
         _provider.LoadAllSharpExtensions();
         _provider.CallInit<IModule>(e => { _logger.LogError(e, "An error occurred when calling Init."); });
-
         return true;
     }
 

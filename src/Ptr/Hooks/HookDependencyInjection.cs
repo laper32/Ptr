@@ -23,5 +23,9 @@ public static class HookDependencyInjection
         typeof(INativeHookManager).SetStaticReadonlyProperty("Instance", hookManager);
         self.UseHook<HandleDropWeaponHookService>();
         self.UseHook<HandleCommandBuyHookService>();
+        
+        // Initialize built-in hooks
+        self.GetRequiredService<HandleDropWeaponHookService>().Init();
+        self.GetRequiredService<HandleCommandBuyHookService>().Init();
     }
 }

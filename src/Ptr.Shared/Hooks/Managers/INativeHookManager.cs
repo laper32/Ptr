@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Ptr.Shared.Extensions;
 using Ptr.Shared.Hooks.Abstractions;
 using Ptr.Shared.Hooks.Params;
 using Sharp.Shared;
@@ -18,8 +19,8 @@ public interface INativeHookManager
 
     void RegisterNativeHook(IModSharpModule module, IAbstractNativeHook hook);
 
-    void LoadModuleHooks(IModSharpModule module);
-    void UnloadModuleHooks(IModSharpModule module);
+    internal void LoadModuleHooks(IModSharpModule module);
+    internal void UnloadModuleHooks(IModSharpModule module);
 }
 
 public static class ServiceProviderExtensions
@@ -27,6 +28,15 @@ public static class ServiceProviderExtensions
     extension(IServiceProvider self)
     {
         public void InitNativeHooks()
+        {
+            var hooks = self.GetAllServices<IAbstractNativeHook>(t => !t.ContainsGenericParameters).ToArray();
+            foreach (var hook in hooks)
+            {
+                hook.Init();
+            }
+        }
+
+        public void LoadNativeHooks()
         {
             var module = self.GetRequiredService<IModSharpModule>();
             INativeHookManager.Instance.LoadModuleHooks(module);

@@ -27,12 +27,11 @@ internal class NativeHookManager : IInternalNativeHookManager
         _logger = logger;
     }
 
-
     private record NativeHookInfo(IModSharpModule Module, IAbstractNativeHook Hook);
 
     #region IModule
 
-    public void OnInit()
+    public void OnPostInit()
     {
         foreach (var hook in _hooks.Where(x => x.Module.Equals(_self)).Select(x => x.Hook))
         {
@@ -66,13 +65,15 @@ internal class NativeHookManager : IInternalNativeHookManager
                 hook.GetType().Name);
             return;
         }
-
+        
         _hooks.Add(new NativeHookInfo(module, hook));
     }
 
     public void LoadModuleHooks(IModSharpModule module)
     {
-        foreach (var abstractNativeHook in _hooks.Where(x => x.Module.Equals(module)).Select(x => x.Hook))
+        var hooks = _hooks.Where(x => x.Module.Equals(module)).Select(x => x.Hook).ToArray();
+
+        foreach (var abstractNativeHook in hooks)
         {
             abstractNativeHook.Load();
         }
@@ -80,7 +81,9 @@ internal class NativeHookManager : IInternalNativeHookManager
 
     public void UnloadModuleHooks(IModSharpModule module)
     {
-        foreach (var abstractNativeHook in _hooks.Where(x => x.Module.Equals(module)).Select(x => x.Hook))
+        var hooks = _hooks.Where(x => x.Module.Equals(module)).Select(x => x.Hook).ToArray();
+        
+        foreach (var abstractNativeHook in hooks)
         {
             abstractNativeHook.Unload();
         }

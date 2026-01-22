@@ -54,6 +54,8 @@ internal class MapManager : IModSharpModule, IMapManager, IGameListener
         _logger = sharedSystem.GetLoggerFactory().CreateLogger<MapManager>();
 
         _provider = provider;
+        _provider.UseHook<ApplyGameSettingsHook>();
+
     }
 
     internal int GetVoteSuccessNumberRequested()
@@ -97,7 +99,6 @@ internal class MapManager : IModSharpModule, IMapManager, IGameListener
             _bridge.Maps.Add(obj);
         }
 
-        //CallMapConfigLoaded();
     }
 
     private void CallMapConfigLoaded()
@@ -126,6 +127,7 @@ internal class MapManager : IModSharpModule, IMapManager, IGameListener
     {
         InitConfig();
         _provider.CallInit<IModule>(e => { _logger.LogError(e, "An error occurred when initializing modules"); });
+        _provider.InitNativeHooks();
 
         return true;
     }
@@ -150,6 +152,9 @@ internal class MapManager : IModSharpModule, IMapManager, IGameListener
             "Ratio request for a success vote.");
         _provider.CallPostInit<IModule>(e => { _logger.LogError(e, "An error occurred when initializing modules"); });
         _bridge.SharpModuleManager.RegisterSharpModuleInterface<IMapManager>(this, IMapManager.Identity, this);
+
+        _provider.LoadAllSharpExtensions();
+        _provider.LoadNativeHooks();
     }
 
     private void OnChatFormatPrefixChange(IConVar conVar)
@@ -167,16 +172,14 @@ internal class MapManager : IModSharpModule, IMapManager, IGameListener
 
     public void OnAllModulesLoaded()
     {
-        _provider.LoadAllSharpExtensions();
-        _provider.UseHook<ApplyGameSettingsHook>();
-        _provider.InitNativeHooks();
+
         _provider.CallAllModulesLoaded<IModule>(e => { _logger.LogError(e, "An error occurred when initializing modules"); });
 
         CallMapConfigLoaded();
 
-        var _localizerManager = _bridge.SharpModuleManager
+        var localizerManager = _bridge.SharpModuleManager
             .GetRequiredSharpModuleInterface<ILocalizerManager>(ILocalizerManager.Identity).Instance!;
-        _localizerManager.LoadLocaleFile("Ptr.Modules.MapManager");
+        localizerManager.LoadLocaleFile("Ptr.Modules.MapManager");
         
     }
 
