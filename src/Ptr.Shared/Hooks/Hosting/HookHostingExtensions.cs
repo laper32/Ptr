@@ -14,7 +14,7 @@ public static class HookHostingExtensions
             var sharedSystem = p.GetRequiredService<ISharedSystem>();
             var logger = p.GetRequiredService<ILogger<THook>>();
 
-            return (THook)Activator.CreateInstance(typeof(THook), module, name, sharedSystem, logger)!;
+            return ActivatorUtilities.CreateInstance<THook>(p, module, name, sharedSystem, logger);
         });
     }
 
